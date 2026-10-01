@@ -1,0 +1,60 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 12/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Fin de la encuesta</b>
+    </h3>
+    <h5>
+        <p class="text-center">
+        Participation fee: {{ participant.vars.participation_fee }} COP <br><br>
+            {{ if session.config.name == "session_C4P_SPANISH_w1" }}
+                {{ if not participant.vars.dropout }}
+                    <br><br>
+                {{ endif }}
+            {{ endif }}
+        <button class="btn btn-primary">
+            SALIDA
+        </button>
+        </p>
+    </h5>
+
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

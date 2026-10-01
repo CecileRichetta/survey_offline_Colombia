@@ -1,0 +1,156 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 3/12
+        </p>
+{{ endblock }}
+
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Información general</b>
+    </h3>
+<h5>
+        {{ if participant.vars.military_binary == 1 }}
+        <p>
+          Pensando en su tiempo prestrando servicio militar...
+        </p>
+    {{ elif participant.vars.military_binary == 0 }}
+        <p>
+           Pensando en la época entre 1989 y 1996...
+        </p>
+
+    {{ endif }}
+
+{{ formfields }}
+
+<script>
+    // Polyfill for closest() for older browsers
+    if (!Element.prototype.closest) {
+        Element.prototype.closest = function(s) {
+            var el = this;
+            do {
+                if (el.matches && el.matches(s)) return el;
+                el = el.parentElement || el.parentNode;
+            } while (el !== null && el.nodeType === 1);
+            return null;
+        };
+    }
+
+    // Polyfill for matches() for older browsers
+    if (!Element.prototype.matches) {
+        Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+    }
+
+    function hideFrequencyByLabel(frequencyName) {
+        var labels = document.querySelectorAll('label');
+        labels.forEach(function(label) {
+            if (label.textContent.indexOf('¿con qué frecuencia?') !== -1) {
+                var container = label.closest('div, tr');
+                if (container && container.querySelector('input[name="' + frequencyName + '"]')) {
+                    container.style.display = 'none';
+                    container.setAttribute('data-field', frequencyName);
+                }
+            }
+        });
+    }
+
+    function toggleFrequencyQuestion(binaryName, frequencyName) {
+        var binaryRadios = document.querySelectorAll('input[name="' + binaryName + '"]');
+        var frequencyContainer = document.querySelector('[data-field="' + frequencyName + '"]');
+
+        if (!frequencyContainer) return;
+
+        // Check initial state - if "Yes" is already selected, show the frequency question
+        var selectedRadio = document.querySelector('input[name="' + binaryName + '"]:checked');
+        if (selectedRadio && selectedRadio.value === '1') {
+            frequencyContainer.style.display = '';
+        } else {
+            frequencyContainer.style.display = 'none';
+        }
+
+        // Add event listeners for future changes
+        binaryRadios.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                if (this.value === '1') {
+                    frequencyContainer.style.display = '';
+                } else {
+                    frequencyContainer.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // First hide all frequency questions and mark them
+    hideFrequencyByLabel('etv_sc_1');
+    hideFrequencyByLabel('etv_sc_2');
+    hideFrequencyByLabel('etv_sc_3');
+    hideFrequencyByLabel('etv_sc_5_1');
+    hideFrequencyByLabel('etv_sc_5_2');
+    hideFrequencyByLabel('etv_sc_6');
+    hideFrequencyByLabel('etv_sc_7');
+    hideFrequencyByLabel('etv_sc_8');
+    hideFrequencyByLabel('etv_sc_9');
+
+    // Then set up the toggles (this will check current values and show if needed)
+    toggleFrequencyQuestion('etv_bi_1', 'etv_sc_1');
+    toggleFrequencyQuestion('etv_bi_2', 'etv_sc_2');
+    toggleFrequencyQuestion('etv_bi_3', 'etv_sc_3');
+    toggleFrequencyQuestion('etv_bi_5_1', 'etv_sc_5_1');
+    toggleFrequencyQuestion('etv_bi_5_2', 'etv_sc_5_2');
+    toggleFrequencyQuestion('etv_bi_6', 'etv_sc_6');
+    toggleFrequencyQuestion('etv_bi_7', 'etv_sc_7');
+    toggleFrequencyQuestion('etv_bi_8', 'etv_sc_8');
+    toggleFrequencyQuestion('etv_bi_9', 'etv_sc_9');
+</script>
+
+</h5>
+
+<p class="text-center">
+    <button class="btn-primary">
+        SIGUIENTE
+    </button>
+</p>
+
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

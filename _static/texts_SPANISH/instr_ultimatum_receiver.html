@@ -1,0 +1,33 @@
+<div id="instructions-ultimatum-receiver">
+    {{ block scripts }}
+        <!doctype html>
+        <html lang="en">
+            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .text-justify {
+                text-align: justify;
+            }
+        </style>
+    {{ endblock }}
+    <div class="card bg-light border-0 shadow-sm my-4">
+        <div class="card-body px-4 py-5">
+            <h5>
+            <ul class="mt-3 mb-4">
+                <li>En este juego, el sistema empareja automáticamente ""Proponente"" y ""Receptor"".</li>
+                <li>Usted juega como Receptor.</li>
+                <li>El Proponente tiene 4 fichas.</li>
+                <li>Cada ficha tiene un valor de 2000 COP.</li>
+                <li>Usted, como Receptores, inicialmente no recibe ninguna ficha.</li>
+                <li>Usted debe indicar la cantidad de fichas que desea recibir, de 0 a 4 fichas.</li>
+                <li>Si el Proponente le da menos fichas de las que solicitó, no recibirá ninguna ficha.</li>
+                <li>Si el Proponente le da más fichas de las que solicitó,  recibirá la cantidad de fichas que ofreció el Proponente.</li>
+                {% if player.session.config.name == "session_C4P_SPANISH_w1" %}
+                    <li>Sabrá los resultados de esta actividad en el segundo cuestionario.</li>
+                {% endif %}
+            </ul>
+            </h5>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,136 @@
+{{ block scripts }}
+    <html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+{{ endblock }}
+
+{{ block style }}
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 9/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Información general</b>
+    </h3>
+
+    <h5>
+        <p>
+            Si lo desea, puede ceder parte de su cuota de participación de {{ participant.vars.participation_fee }} a una ONG.
+            Puede donar nada, una parte, o la totalidad de su participación.
+            Enviaremos este dinero a la ONG al final del estudio.
+            Hay tres ONG potenciales: <br>
+            1. Asomujer y Trabajo (Derechos humanos y afines para la paz y el desarrollo de Colombia) <br>
+            2. Fundación Pies Descalzos (Educación y desarrollo infantil)<br>
+            3. TECHO Colombia (Vivienda y desarrollo comunitario)<br>          <br>
+        </p>
+        <p>
+            {{ formfields }}
+        </p>
+<script>
+    // Function to find and hide field by label text
+    function hideFieldByLabel(fieldName, labelTextPart) {
+        var labels = document.querySelectorAll('label');
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            if (label.textContent.indexOf(labelTextPart) !== -1) {
+                var parent = label.parentElement;
+                var attempts = 0;
+                while (parent && parent !== document.body && attempts < 10) {
+                    var field = parent.querySelector('input[name="' + fieldName + '"]');
+                    if (field) {
+                        parent.style.display = 'none';
+                        parent.setAttribute('data-conditional-field', fieldName);
+                        break;
+                    }
+                    parent = parent.parentElement;
+                    attempts++;
+                }
+                if (parent && parent.getAttribute('data-conditional-field')) break;
+            }
+        }
+    }
+
+    // Function to toggle ngo_amount and ngo_name based on ngo_binary
+    function toggleNGOFields() {
+        var ngoBinaryRadios = document.querySelectorAll('input[name="ngo_binary"]');
+        var ngoAmountContainer = document.querySelector('[data-conditional-field="ngo_amount"]');
+        var ngoNameContainer = document.querySelector('[data-conditional-field="ngo_name"]');
+
+        if (!ngoAmountContainer || !ngoNameContainer) {
+            return;
+        }
+
+        // Check initial state
+        var selectedRadio = document.querySelector('input[name="ngo_binary"]:checked');
+        if (selectedRadio && selectedRadio.value === 'True') {
+            ngoAmountContainer.style.display = '';
+            ngoNameContainer.style.display = '';
+        } else {
+            ngoAmountContainer.style.display = 'none';
+            ngoNameContainer.style.display = 'none';
+        }
+
+        // Add event listeners
+        for (var i = 0; i < ngoBinaryRadios.length; i++) {
+            ngoBinaryRadios[i].addEventListener('change', function() {
+                if (this.value === 'True') {
+                    ngoAmountContainer.style.display = '';
+                    ngoNameContainer.style.display = '';
+                } else {
+                    ngoAmountContainer.style.display = 'none';
+                    ngoNameContainer.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // First hide the conditional fields and mark them
+    hideFieldByLabel('ngo_amount', '¿cuánto?');
+    hideFieldByLabel('ngo_name', '¿A qué ONG?');
+
+    // Then set up the toggle
+    toggleNGOFields();
+</script>
+
+    </h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+    </html>
+{{ endblock }}

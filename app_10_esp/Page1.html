@@ -1,0 +1,148 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 11/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <div class="card bg-light border-0 shadow-sm my-4">
+    <div class="card-body px-4 py-5">
+        <h3 class="mb-4 text-center text-primary">
+            <b>Evaluación del cuestionario</b>
+        </h3>
+<h5>
+    <p>
+Gracias por completar el cuestionario. Tal como se indica en el formulario de consentimiento, esta investigación es un estudio piloto y el equipo de investigación quisiera solicitarle sus comentarios sobre las preguntas que acaba de responder.
+        {{ formfields }}
+    </p>
+
+    <script>
+    // Polyfill for closest() for older browsers
+    if (!Element.prototype.closest) {
+        Element.prototype.closest = function(s) {
+            var el = this;
+            do {
+                if (el.matches && el.matches(s)) return el;
+                el = el.parentElement || el.parentNode;
+            } while (el !== null && el.nodeType === 1);
+            return null;
+        };
+    }
+
+    // Polyfill for matches() for older browsers
+    if (!Element.prototype.matches) {
+        Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+    }
+
+    // Function to find and hide field by label text
+    function hideFieldByLabel(fieldName, labelTextPart) {
+        var labels = document.querySelectorAll('label');
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            if (label.textContent.indexOf(labelTextPart) !== -1) {
+                var parent = label.parentElement;
+                var attempts = 0;
+                while (parent && parent !== document.body && attempts < 10) {
+                    var field = parent.querySelector('textarea[name="' + fieldName + '"]');
+                    if (field) {
+                        parent.style.display = 'none';
+                        parent.setAttribute('data-conditional-field', fieldName);
+                        break;
+                    }
+                    parent = parent.parentElement;
+                    attempts++;
+                }
+                if (parent && parent.getAttribute('data-conditional-field')) break;
+            }
+        }
+    }
+
+    // Function to toggle evaluation_long fields based on evaluation selection
+    function toggleEvaluationLong(evaluationName, evaluationLongName) {
+        var evaluationRadios = document.querySelectorAll('input[name="' + evaluationName + '"]');
+        var evaluationLongContainer = document.querySelector('[data-conditional-field="' + evaluationLongName + '"]');
+
+        if (!evaluationLongContainer) return;
+
+        // Check initial state - hide if value is 4, 998, or 999
+        var selectedRadio = document.querySelector('input[name="' + evaluationName + '"]:checked');
+        if (selectedRadio && (selectedRadio.value === '4' || selectedRadio.value === '998' || selectedRadio.value === '999')) {
+            evaluationLongContainer.style.display = 'none';
+        } else if (selectedRadio) {
+            evaluationLongContainer.style.display = '';
+        } else {
+            // Nothing selected yet, hide by default
+            evaluationLongContainer.style.display = 'none';
+        }
+
+        // Add event listeners for future changes
+        for (var i = 0; i < evaluationRadios.length; i++) {
+            evaluationRadios[i].addEventListener('change', function() {
+                if (this.value === '4' || this.value === '998' || this.value === '999') {
+                    evaluationLongContainer.style.display = 'none';
+                } else {
+                    evaluationLongContainer.style.display = '';
+                }
+            });
+        }
+    }
+
+    // First hide all evaluation_long fields and mark them
+    hideFieldByLabel('evaluation_1_long', 'especifique la pregunta que considera demasiado larga');
+    hideFieldByLabel('evaluation_2_long', 'indique el contenido que considere difícil');
+    hideFieldByLabel('evaluation_3_long', 'especifique el contenido de la actividad');
+    hideFieldByLabel('evaluation_4_long', 'pregunta le incomodó más');
+    hideFieldByLabel('evaluation_5_long', 'información sobre sus derechos');
+    hideFieldByLabel('evaluation_6_long', 'parte del cuestionario no es interesante');
+
+    // Then set up the toggles
+    toggleEvaluationLong('evaluation_1', 'evaluation_1_long');
+    toggleEvaluationLong('evaluation_2', 'evaluation_2_long');
+    toggleEvaluationLong('evaluation_3', 'evaluation_3_long');
+    toggleEvaluationLong('evaluation_4', 'evaluation_4_long');
+    toggleEvaluationLong('evaluation_5', 'evaluation_5_long');
+    toggleEvaluationLong('evaluation_6', 'evaluation_6_long');
+</script>
+
+</h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

@@ -1,0 +1,110 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .example-container {
+            margin-bottom: 20px;
+            border: 1px solid #ccc; /* Bordure grise */
+            border-radius: 8px; /* Coins arrondis */
+            padding: 15px; /* Espace entre la bordure et le contenu */
+            /* background-color: #f9f9f9; /* Optionnel: fond légèrement grisé */
+            justify-content: center; /* Align horizontal */
+            align-items: center; /* Align vertical */
+            text-align: justify;
+            text-justify: inter-word;
+        }
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .example-image {
+            width: 100%;
+            height: auto;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 6/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Segunda actividad</b>
+    </h3>
+    <h5>
+    <p>
+    {{ include C.TEMPLATE_INSTRUCTIONS_PG }}
+    </p>
+
+    <!-- Example 1 -->
+<div class="example-container row">
+    <div class="example-title">
+        El primer ejemplo a continuación ilustra la actividad:</div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_PG_EXAMPLE1 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            <h5>
+        En este primer ejemplo, tanto la persona verde como la persona morada comienzan con cuatro fichas. La persona verde decide quedarse con todas sus fichas y no poner ninguna en el frasco común. La persona morada decide colocar dos fichas en el frasco común. Por lo tanto, hay dos fichas en el frasco.
+        El experimentador (la persona gris) añade la mitad de esa cantidad: añade una ficha, y ahora hay tres fichas en el frasco. Esta cantidad se divide por igual entre la persona verde y la persona morada, por lo que cada uno recibe 1,5 fichas.
+        Por lo tanto, al final, la persona verde tiene 5,5 fichas y la persona morada tiene 3,5 fichas."
+    </h5>
+        </p><br><br>
+    </div>
+</div>
+<br>
+<!-- Example 2 -->
+
+<div class="example-container row">
+    <div class="example-title">El segundo ejemplo a continuación ilustra la actividad:</div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_PG_EXAMPLE2 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            En este segundo ejemplo, tanto la persona verde como la persona morada comienzan nuevamente con cuatro fichas. Ambos deciden colocar todas sus fichas en el frasco común. Por lo tanto, hay ocho fichas en el frasco. El experimentador añade la mitad de esa cantidad, es decir, cuatro fichas. Ahora hay 12 fichas en el frasco. Esta cantidad se divide por igual entre la persona verde y la persona morada, por lo que cada uno recibe 6 fichas. Por lo tanto, al final, ambos tienen seis fichas
+</p> <br><br>
+    </div>
+</div>
+        <b> 6.1. Por favor, indique si las siguientes afirmaciones son verdaderas o falsas:</b>
+            {{ formfields }}
+
+    </p>
+    </h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

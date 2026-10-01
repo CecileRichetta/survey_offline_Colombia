@@ -1,0 +1,179 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 12/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Información del contacto</b>
+    </h3>
+
+    <h5>
+        <p>
+            {{ formfields }}
+        </p>
+    </h5>
+
+<script>
+    // Polyfill for closest() for older browsers
+    if (!Element.prototype.closest) {
+        Element.prototype.closest = function(s) {
+            var el = this;
+            do {
+                if (el.matches && el.matches(s)) return el;
+                el = el.parentElement || el.parentNode;
+            } while (el !== null && el.nodeType === 1);
+            return null;
+        };
+    }
+
+    // Polyfill for matches() for older browsers
+    if (!Element.prototype.matches) {
+        Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+    }
+
+    // Function to find and hide field by label text
+    function hideFieldByLabel(fieldName, labelTextPart) {
+        var labels = document.querySelectorAll('label');
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            if (label.textContent.indexOf(labelTextPart) !== -1) {
+                var parent = label.parentElement;
+                var attempts = 0;
+                while (parent && parent !== document.body && attempts < 10) {
+                    var field = parent.querySelector('input[name="' + fieldName + '"], select[name="' + fieldName + '"], textarea[name="' + fieldName + '"]');
+                    if (field) {
+                        parent.style.display = 'none';
+                        parent.setAttribute('data-conditional-field', fieldName);
+                        break;
+                    }
+                    parent = parent.parentElement;
+                    attempts++;
+                }
+                if (parent && parent.getAttribute('data-conditional-field')) break;
+            }
+        }
+    }
+
+    // Function to toggle payment_unica2 based on payment_unica1 selection
+    function togglePaymentUnica2() {
+        var unica1Selects = document.querySelectorAll('select[name="payment_unica1"], input[name="payment_unica1"]');
+        var unica2Container = document.querySelector('[data-conditional-field="payment_unica2"]');
+
+        if (!unica2Container) {
+            return;
+        }
+
+        // Check initial state
+        var selectedOption = document.querySelector('select[name="payment_unica1"]');
+        if (selectedOption && selectedOption.value === '999') {
+            unica2Container.style.display = '';
+        } else {
+            unica2Container.style.display = 'none';
+        }
+
+        // Add event listeners
+        for (var i = 0; i < unica1Selects.length; i++) {
+            unica1Selects[i].addEventListener('change', function() {
+                if (this.value === '999') {
+                    unica2Container.style.display = '';
+                } else {
+                    unica2Container.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // Function to toggle recall fields based on recall_firstwave selection
+    function toggleRecallFields() {
+        var recallRadios = document.querySelectorAll('input[name="recall_firstwave"]');
+        var phoneContainer = document.querySelector('[data-conditional-field="recall_phone1"]');
+        var emailContainer = document.querySelector('[data-conditional-field="recall_email"]');
+        var addressContainer = document.querySelector('[data-conditional-field="recall_address"]');
+
+        if (!phoneContainer || !emailContainer || !addressContainer) {
+            return;
+        }
+
+        // Check initial state
+        var selectedRadio = document.querySelector('input[name="recall_firstwave"]:checked');
+        if (selectedRadio && selectedRadio.value === 'True') {
+            phoneContainer.style.display = '';
+            emailContainer.style.display = '';
+            addressContainer.style.display = '';
+        } else {
+            phoneContainer.style.display = 'none';
+            emailContainer.style.display = 'none';
+            addressContainer.style.display = 'none';
+        }
+
+        // Add event listeners
+        for (var i = 0; i < recallRadios.length; i++) {
+            recallRadios[i].addEventListener('change', function() {
+                if (this.value === 'True') {
+                    phoneContainer.style.display = '';
+                    emailContainer.style.display = '';
+                    addressContainer.style.display = '';
+                } else {
+                    phoneContainer.style.display = 'none';
+                    emailContainer.style.display = 'none';
+                    addressContainer.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // First hide all conditional fields and mark them
+    hideFieldByLabel('payment_unica2', '11.1.4. Si la persona responde ninguno preguntar: Respuesta única');
+    hideFieldByLabel('recall_phone1', '11.2.1. Por favor, proporcione un número telefónico de Contacto (puede ser diferente al que entrega de la compensación):');
+    hideFieldByLabel('recall_email', '11.2.2. Por favor, proporcione una dirección de correo electrónico válida (puede ser diferente al que entrega de la compensación):');
+    hideFieldByLabel('recall_address', '11.2.3. Por favor, proporcione una dirección geográfica para el recontacto a la encuesta 2:');
+
+    // Then set up the toggles
+    togglePaymentUnica2();
+    toggleRecallFields();
+</script>
+
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

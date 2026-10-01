@@ -1,0 +1,66 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Questionnaire progress: 12/11
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Pagos finales de las actividades </b>
+    </h3>
+    <h5>
+    <p>
+        En conjunto, se recibe:
+        <li>  {{ participant.vars.payoff_UG }} fichas de la primera tarea. </li>
+        <li>  {{ participant.vars.payoff_PG }} fichas de la segunda tarea.</li>
+        <br>
+      Por lo tanto, tienes un total de  {{ participant.vars.total_payoff_token }} fichas de las actividades.
+      Esto equivale a {{ participant.vars.payoff_games }} pesos colombianos COP.    </p>
+
+
+        {{ formfields }}
+
+    </h5>
+
+    <p class="text-center">
+        <button class="btn btn-primary">
+            NEXT
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

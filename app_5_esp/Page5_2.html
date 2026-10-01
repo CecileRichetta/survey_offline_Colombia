@@ -1,0 +1,121 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+        #instructions-ultimatum-receiver {
+            display: none;
+            padding: 10px; /* Optional: Add some padding for better readability */
+            color: black; /* Optional: Change text color to black for contrast */
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', (e) => {
+            const instructions = document.getElementById('instructions-ultimatum-receiver'),
+                btnToggle = document.getElementById('toggle-instructions-btn');
+
+            let displayed = false;
+
+            const toggling = () => {
+                if (displayed) {
+                    instructions.style.display = 'none';
+                    displayed = false;
+                } else {
+                    instructions.style.display = 'block';
+                    displayed = true;
+                }
+            }
+
+            btnToggle.addEventListener('click', toggling);
+        })
+    </script>
+</head>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 5/12
+        </p>
+{{ endblock }}
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Primera actividad</b>
+    </h3>
+    <h5>
+    <p>
+Si tiene alguna pregunta sobre esta actividad, por favor haga clic en 'Mostrar/Ocultar instrucciones' al final de esta página
+Recuerde: para esta tarea, usted no tiene fichas al inicio, y la otra persona tiene 4 fichas. Al final del cuestionario,
+        cada ficha se convertirá en {{ C.TOKEN_VALUE }} pesos colombianos (COP).
+    </p>
+    {{ if participant.vars.treatment_other == 0 }}
+        <p>
+5.4. ¿Cuál de las propuestas del otro jugador está dispuesto a aceptar?
+        </p>
+    {{ elif participant.vars.treatment_other == 1 }}
+        <p>
+5.4. Su compañero es alguien que pertenece a grupos que compartíen los objetivos que perseguía las FARC durante el conflicto. ¿Cuál de las propuestas del otro jugador está dispuesto a aceptar?
+        </p>
+    {{ elif participant.vars.treatment_other == 2 }}
+        <p>
+5.4. Su compañero es alguien que pertenece a grupos que se oponen a los objetivos que perseguía las FARC durante el conflicto. ¿Cuál de las propuestas del otro jugador está dispuesto a aceptar?
+       </p>
+    {{ elif participant.vars.treatment_other == 3 }}
+        <p>
+5.4. Su compañero es alguien que pertenece a grupos que compartíen los objetivos que perseguía las FARC durante el conflicto y un excombatiente, ya sea del ejército nacional o de un grupo insurgente. ¿Cuál de las propuestas del otro jugador está dispuesto a aceptar?
+       </p>
+    {{ elif participant.vars.treatment_other == 4 }}
+        <p>
+5.4. Su compañero es alguien que pertenece a grupos que se oponen a los objetivos que perseguía las FARC durante el conflicto y un excombatiente, ya sea del ejército nacional o de un grupo insurgente. ¿Cuál de las propuestas del otro jugador está dispuesto a aceptar?"
+       </p>
+    {{ endif }}
+
+
+    {{ formfield 'decision_receiver' }}
+
+<p>
+    <br><br>
+    <button type="button" class="btn btn-outline-primary" id="toggle-instructions-btn">
+        Mostrar/Ocultar instrucciones
+    </button>
+    {{ include C.TEMPLATE_INSTRUCTIONS_ULTIMATUM_RECEIVER }}
+</p>
+</h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

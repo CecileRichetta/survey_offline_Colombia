@@ -1,0 +1,67 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+{{ endblock }}
+
+{{ block style }}
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 8/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Relaciones con otros</b>
+    </h3>
+    <h5>
+    <p>
+        {{ if participant.vars.group == 0 }}
+            {{ formfield 'intergroup_trust_3' label="8.5. Por favor dígame, en qué medida está de acuerdo o en desacuerdo con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que compartían los objetivos perseguidos por las FARC durante el conflicto no engañan deliberadamente." }}
+            {{ formfield 'intergroup_trust_4' label="8.6. Por favor, dígame que tan de acuerdo o en desacuerdo esta con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que compartían los objetivos perseguidos por las FARC durante el conflicto no son confiables para cumplir sus promesas." }}
+            {{ formfield 'intergroup_trust_7' label="8.7. Por favor, dígame que tan de acuerdo o en desacuerdo esta con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que compartían los objetivos perseguidos por las FARC durante el conflicto son personas bien intencionadas." }}
+        {{ elif participant.vars.group == 1 }}
+            {{ formfield 'intergroup_trust_3' label="8.5. Por favor dígame, en qué medida está de acuerdo o en desacuerdo con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto no engañan deliberadamente." }}
+            {{ formfield 'intergroup_trust_4' label="8.6. Por favor, dígame que tan de acuerdo o en desacuerdo está con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto no son confiables para cumplir sus promesas." }}
+            {{ formfield 'intergroup_trust_7' label="8.7. Por favor, dígame que tan de acuerdo o en desacuerdo esta con la siguiente afirmación: La mayoría de las personas que pertenecen a grupos que se oponen a os objetivos perseguidos por las FARC durante el conflicto son personas bien intencionadas." }}
+        {{ endif }}
+    </p>
+</h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

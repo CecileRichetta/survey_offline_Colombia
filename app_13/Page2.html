@@ -1,0 +1,59 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+    </style>
+
+{{ endblock }}
+
+    {{ block content }}
+    <h2>Información para el pago a los participantes</h2>
+
+    {{ if total_records > 0 }}
+        <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Date interview</th>
+                    <th>Phone number</th>
+                    <th>Cedula</th>
+                    <th>Unica</th>
+                    <th>Participación</th>
+                    <th>Juegos</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in csv_data %}
+                    <tr>
+                        <td>{{ row.participant_label }}</td>
+                        <td>{{ row.date_interview }}</td>
+                        <td>{{ row.participant_number }}</td>
+                        <td>{{ row.participant_cedula }}</td>
+                        <td>{{ row.participant_unica }}</td>
+                        <td>{{ row.participation_fee }}</td>
+                        <td>{{ row.payoff_games }}</td>
+                        <td>{{ row.total_compensation }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p>Total number of respondents : {{ total_records }}</p>
+    {{ else }}
+        <p>Esperando datos de los participantes</p>
+    {{ endif }}
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

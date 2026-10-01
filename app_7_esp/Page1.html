@@ -1,0 +1,71 @@
+{{ block scripts }}
+    <html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+{{ endblock }}
+
+{{ block style }}
+    <style>
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 7/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Relaciones con otros</b>
+    </h3>
+<h5>
+    <p>
+        {{ if participant.vars.group == 0 }}
+            {{ formfield 'empathy_6' label="7.1. ¿En qué medida está de acuerdo con la siguiente afirmación?: Me conmueven los relatos de sufrimiento de personas pertenecientes a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto." }}
+            {{ formfield 'guilt_1' label="7.2. ¿Qué tan de acuerdo está usted con la siguiente afirmación?: A veces me siento culpable por lo que personas pertenecientes a grupos que comparten los objetivos perseguidos por las FARC durante el conflicto han hecho a personas pertenecientes a grupos que se oponen a estos objetivos." }}
+            {{ formfield 'anger_2' label="7.3. ¿Qué tan de acuerdo está con la siguiente afirmación? Pensar en cómo las personas pertenecientes a grupos que comparten los objetivos perseguidos por las FARC durante el conflicto han tratado a las personas pertenecientes a grupos que se oponen a estos objetivos me hace sentir enojo." }}
+            {{ formfield 'fear_1' label="7.4. ¿Qué tan de acuerdo está con la siguiente afirmación?: Siento temor por la acciones de personas pertenecientes a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto." }}
+        {{ elif participant.vars.group == 1 }}
+            {{ formfield 'empathy_6' label="7.1. ¿Que tan de acuerdo está con la siguiente afirmación?: Me conmueven los relatos de sufrimiento de personas pertenecientes a grupos que comparten los objetivos perseguidos por las FARC durante el conflicto."}}
+            {{ formfield 'guilt_1' label="7.2. ¿Qué tan de acuerdo está con la siguiente afirmación?: A veces me siento culpable por lo que personas pertenecientes a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto han hecho a personas pertenecientes a grupos que comparten esos objetivos." }}
+            {{ formfield 'anger_2' label="7.3. ¿Qué tan de acuerdo está con la siguiente afirmación? Pensar en cómo las personas pertenecientes a grupos que se oponen a los objetivos perseguidos por las FARC durante el conflicto han tratado a las personas pertenecientes a grupos que comparten estos objetivos me hace sentir enojo." }}
+            {{ formfield 'fear_1' label="7.4. ¿Qué tan de acuerdo está con la siguiente afirmación?: Siento temor por la acción de personas pertenecientes a grupos que comparten los objetivos perseguidos por las FARC durante el conflicto." }}
+
+        {{ endif }}
+    </p>
+</h5>
+    <p class="text-center">
+        <button class="btn btn-primary">
+            SIGUIENTE
+        </button>
+    </p>
+{{ endblock }}
+
+{{ block options }}
+    </html>
+{{ endblock }}

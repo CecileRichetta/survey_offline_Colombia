@@ -1,0 +1,155 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 2/12
+        </p>
+{{ endblock }}
+
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Información general</b>
+    </h3>
+<h5>
+    {{ formfields }}
+
+<script>
+    // Function to find and hide field by label text
+    function hideFieldByLabel(fieldName, labelTextPart) {
+        var labels = document.querySelectorAll('label');
+        for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            if (label.textContent.indexOf(labelTextPart) !== -1) {
+                var parent = label.parentElement;
+                var attempts = 0;
+                while (parent && parent !== document.body && attempts < 10) {
+                    var field = parent.querySelector('input[name="' + fieldName + '"], textarea[name="' + fieldName + '"]');
+                    if (field) {
+                        parent.style.display = 'none';
+                        parent.setAttribute('data-conditional-field', fieldName);
+                        break;
+                    }
+                    parent = parent.parentElement;
+                    attempts++;
+                }
+                if (parent && parent.getAttribute('data-conditional-field')) break;
+            }
+        }
+    }
+
+    // Function to toggle education_other
+    function toggleEducationOther() {
+        var educationRadios = document.querySelectorAll('input[name="education"]');
+        var educationOtherContainer = document.querySelector('[data-conditional-field="education_other"]');
+
+        if (!educationOtherContainer) {
+            return;
+        }
+
+        // Check initial state
+        var selectedRadio = document.querySelector('input[name="education"]:checked');
+        if (selectedRadio && selectedRadio.value === '10') {
+            educationOtherContainer.style.display = '';
+        } else {
+            educationOtherContainer.style.display = 'none';
+        }
+
+        // Add event listeners
+        for (var i = 0; i < educationRadios.length; i++) {
+            educationRadios[i].addEventListener('change', function() {
+                if (this.value === '10') {
+                    educationOtherContainer.style.display = '';
+                } else {
+                    educationOtherContainer.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // Function to toggle religiosity
+    function toggleReligiosity() {
+        var religionRadios = document.querySelectorAll('input[name="religion"]');
+        var religiosityContainer = document.querySelector('[data-conditional-field="religiosity"]');
+
+        if (!religiosityContainer) {
+            return;
+        }
+
+        // Check initial state
+        var selectedRadio = document.querySelector('input[name="religion"]:checked');
+        if (!selectedRadio || selectedRadio.value === '7' || selectedRadio.value === '999') {
+            religiosityContainer.style.display = 'none';
+        } else {
+            religiosityContainer.style.display = '';
+        }
+
+        // Add event listeners
+        for (var i = 0; i < religionRadios.length; i++) {
+            religionRadios[i].addEventListener('change', function() {
+                if (this.value === '7' || this.value === '999') {
+                    religiosityContainer.style.display = 'none';
+                } else {
+                    religiosityContainer.style.display = '';
+                }
+            });
+        }
+    }
+
+    // First hide the conditional fields and mark them
+    hideFieldByLabel('education_other', 'Si otro:');
+    hideFieldByLabel('religiosity', '¿Qué tan religioso es?');
+
+    // Then set up the toggles
+    toggleEducationOther();
+    toggleReligiosity();
+</script>
+
+</h5>
+
+<p class="text-center">
+    <button class="btn-primary">
+        SIGUIENTE
+    </button>
+</p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

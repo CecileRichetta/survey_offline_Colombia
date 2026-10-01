@@ -1,0 +1,20 @@
+<div id="instructions-pg">
+    <div class="card bg-light border-0 shadow-sm my-4">
+        <div class="card-body px-4 py-5">
+            <h5>
+            <ul class="mt-3 mb-4">
+                <li>Usted y su compañero tienen 4 fichas.</li>
+                <li>Usted decidirá cuántas fichas desea quedarse y cuántas desea colocar en el frasco central.</li>
+                <li>Puede elegir colocar desde cero hasta 4 fichas en el frasco central.</li>
+                <li>Por cada ficha que se quede, recibirá una ficha al final del estudio.</li>
+                <li>El número de fichas que usted y su compañero coloquen en el frasco central se sumará, y el investigador añadirá a ese total la mitad de esa cantidad.</li>
+                <li>Usted recibirá la mitad de la cantidad en el frasco central después de que el investigador la haya aumentado.</li>
+                <li>El número total de fichas que recibirá = las fichas que se quede + (el número de fichas que usted y su compañero colocaron en el frasco + la mitad de las fichas adicionales que añadió el investigador) / 2</li>
+                {% if player.session.config.name == "session_C4P_SPANISH_w1" %}
+                    <li>Sabrá los resultados de esta actividad en el segundo cuestionario.</li>
+                {% endif %}
+            </ul>
+            </h5>
+        </div>
+    </div>
+</div>

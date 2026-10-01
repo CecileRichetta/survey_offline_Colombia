@@ -1,0 +1,177 @@
+{{ block scripts }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .progress-text {
+            text-align: right;
+            color: grey;
+            font-size: 11px;
+            width: 100%; /* Ensures the text spans the full width of its container */
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .text-center {
+            text-align: center;
+        }
+                .example-container {
+            margin-bottom: 20px;
+            border: 1px solid #ccc; /* Bordure grise */
+            border-radius: 8px; /* Coins arrondis */
+            padding: 15px; /* Espace entre la bordure et le contenu */
+            /* background-color: #f9f9f9; /* Optionnel: fond légèrement grisé */
+            justify-content: center; /* Align horizontal */
+            align-items: center; /* Align vertical */
+            text-align: justify;
+            text-justify: inter-word;
+        }
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .example-image {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+{{ endblock }}
+
+{{ block title }}
+        <p class="progress-text" >
+            Progreso del cuestionario módulo 5/12
+        </p>
+{{ endblock }}
+
+{{ block content }}
+    <h3 class="mb-4 text-center text-primary">
+        <b>Primera actividad</b>
+    </h3>
+    <p>
+    {{ if participant.vars.side_ultimatum == 0 }}
+    {{ include C.TEMPLATE_INSTRUCTIONS_ULTIMATUM_PROPOSER }}
+
+</p>
+
+<!-- Example 1 -->
+    <h5>
+<div class="example-container row">
+
+
+    <div class="example-title">El primer ejemplo a continuación ilustra la actividad:
+ </div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_UG_EXAMPLE1 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            La persona azul comienza con cuatro fichas. Envía 2 fichas a la persona naranja. La persona naranja quiere
+            recibir al menos tres fichas, sin saber la oferta de la persona azul. Por lo tanto, ni la persona azul ni
+            la persona naranja reciben fichas. Aunque la persona azul recibiera cuatro fichas para empezar, como la persona
+            naranja rechazó la oferta, no conserva nada. La persona naranja tampoco recibe nada, como la persona naranja
+            rechazó la oferta, no conserva nada. La persona naranja tampoco recibe nada.
+        </p>
+</div>
+</div>
+
+        <br>
+<!-- Example 2 -->
+
+<div class="example-container row">
+    <div class="example-title">El segundo ejemplo a continuación ilustra la actividad:</div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_UG_EXAMPLE2 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            La persona azul comienza con cuatro fichas. Envía una ficha a la persona naranja. La persona naranja quiere
+            recibir al menos una ficha. Por lo tanto, la persona de azul se queda con tres fichas (las cuatro fichas iniciales
+            menos la ficha que ofreció a la otra persona) y la persona naranja recibe la ficha que se le ofreció.
+        </p>
+    </div>
+</div>
+    </h5>
+{{ elif participant.vars.side_ultimatum == 1 }}
+    {{ include C.TEMPLATE_INSTRUCTIONS_ULTIMATUM_RECEIVER }}
+
+<!-- Example 1 -->
+    <h5>
+<div class="example-container row">
+    <div class="example-title">El primer ejemplo a continuación ilustra la actividad:
+ </div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_UG_EXAMPLE1 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            La persona azul comienza con cuatro fichas. Envía 2 fichas a la persona naranja. La persona naranja quiere
+            recibir al menos tres fichas, sin saber la oferta de la persona azul. Por lo tanto, ni la persona azul ni
+            la persona naranja reciben fichas. Aunque la persona azul recibiera cuatro fichas para empezar, como la persona
+            naranja rechazó la oferta, no conserva nada. La persona naranja tampoco recibe nada, ya que al rechazar la oferta,
+            ninguna de las dos personas conserva sus fichas..
+        </p>
+</div>
+</div>
+
+        <br>
+<!-- Example 2 -->
+
+<div class="example-container row">
+    <div class="example-title">El segundo ejemplo a continuación ilustra la actividad:</div>
+    <div class="col-md-4">
+        <img src="{{ static C.IMAGE_UG_EXAMPLE2 }}" class="img-fluid example-image">
+    </div>
+    <div class="col-md-4">
+        <p>
+            La persona azul comienza con cuatro fichas. Envía una ficha a la persona naranja. La persona naranja quiere
+            recibir al menos una ficha. Por lo tanto, la persona de azul se queda con tres fichas (las cuatro fichas iniciales
+            menos la ficha que ofreció a la otra persona) y la persona naranja recibe la ficha que se le ofreció.
+        </p>
+    </div>
+</div>
+    </h5>
+{{ endif }}
+
+<p> <h5>
+    <b>Por favor, indique si las siguientes afirmaciones son verdaderas o falsas:</b>
+    {{ if participant.vars.side_ultimatum == 0 }}
+        {{ formfield 'ug_proposer_cc1' }}
+        {{ formfield 'ug_proposer_cc2' }}
+        {{ formfield 'ug_proposer_cc3' }}
+    {{ elif participant.vars.side_ultimatum == 1 }}
+        {{ formfield 'ug_receiver_cc1' }}
+        {{ formfield 'ug_receiver_cc2' }}
+        {{ formfield 'ug_receiver_cc3' }}
+    {{ endif }}
+        </h5>
+</p>
+
+<p class="text-center">
+    <button class="btn-primary">
+        SIGUIENTE
+    </button>
+</p>
+{{ endblock }}
+
+{{ block options }}
+</html>
+{{ endblock }}

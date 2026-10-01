@@ -1,0 +1,21 @@
+<div id="instructions-ultimatum-proposer">
+    <div class="card bg-light border-0 shadow-sm my-4">
+        <div class="card-body px-4 py-5">
+            <h5>
+            <ul class="mt-3 mb-4">
+                <li>En este juego, el sistema empareja automáticamente a ""Proponente"" y ""Receptor"".</li>
+                <li>Usted juega como Proponente.</li>
+                <li>Le damos 4 fichas.</li>
+                <li>Cada ficha tiene un valor de 2000 COP.</li>
+                <li>El Receptor no recibe ninguna ficha inicialmente.</li>
+                <li>Usted debe ofrecer la cantidad de fichas que está dispuesto a dar, de 0 a 4 fichas.</li>
+                <li>Si le da al Receptor menos fichas de las que él solicita, usted no recibirá ninguna ficha.</li>
+                <li>Si le da al Receptor lo que pide o más, el Receptor recibirá la cantidad de fichas ofrecida y usted recibirá las fichas restantes.</li>
+                {% if player.session.config.name == "session_C4P_SPANISH_w1" %}
+                    <li>Sabrá los resultados de esta actividad en el segundo cuestionario.</li>
+                {% endif %}
+            </ul>
+            </h5>
+        </div>
+    </div>
+</div>

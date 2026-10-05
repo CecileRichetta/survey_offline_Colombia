@@ -1,14 +1,12 @@
 from os import environ
 
-environ['DATABASE_URL']="postgres://otree_user:OT_spirit12@localhost/otree_third_db"
-
 ROOMS = [
     dict(
         name="C4PTHP_COL",
         display_name="C4PTHP_COL",
         participant_label_file="_rooms/participant_label_colombia.txt",  # change when final study to _inc
         use_secure_urls=False
-    ),
+    )
 #    dict(
 #        name="C4PTHP_COL_TRAINING_1",
 #        display_name="C4PTHP_COL_TRAINING_1",
@@ -21,10 +19,10 @@ ROOMS = [
 #        participant_label_file="_rooms/participant_label_colombia.txt",  # change when final study to _inc
 #        use_secure_urls=False
 #    ),
-    dict(
-        name="pilot_COL_HEAD",
-        display_name="C4P_pilot_COL_HEAD"
-    )
+#    dict(
+#        name="pilot_COL_HEAD",
+#        display_name="C4P_pilot_COL_HEAD"
+#    )
 ]
 
 SESSION_CONFIGS = [
@@ -32,7 +30,7 @@ SESSION_CONFIGS = [
         name='session_C4P_SPANISH_w1',
         app_sequence=[
             'app_1_esp', 'app_2_esp', 'app_3_esp', 'app_4_esp', 'app_5_esp', 'app_6_esp',
-            'app_7_esp', 'app_8_esp', 'app_9_esp', 'app_10_esp', 'app_11_esp'
+            'app_7_esp', 'app_8_esp', 'app_9_esp', 'app_11_esp'
         ],
         num_demo_participants=6
     ),
@@ -40,7 +38,7 @@ SESSION_CONFIGS = [
         name='session_C4P_SPANISH_w2',
         app_sequence=[
             'app_1_esp', 'app_2_esp', 'app_3_esp', 'app_4_esp', 'app_5_esp', 'app_6_esp',
-            'app_7_esp', 'app_8_esp', 'app_9_esp', 'app_10_esp', 'app_11_esp'
+            'app_7_esp', 'app_8_esp', 'app_9_esp', 'app_11_esp'
         ],
         num_demo_participants=6,
     ),

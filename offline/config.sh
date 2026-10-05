@@ -12,6 +12,8 @@ export OTREE_REST_KEY=otree_rest_colombia
 C4P_ROOT="$HOME/otree-experiments"
 C4P_PROJECT="$C4P_ROOT/survey_offline_Colombia"
 C4P_VENV="$C4P_ROOT/venv"
+# Folder of these scripts inside the repository
+C4P_SCRIPTS="$C4P_PROJECT/offline"
 C4P_PORT=8000
 C4P_URL="http://127.0.0.1:$C4P_PORT"
 

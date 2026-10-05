@@ -22,6 +22,11 @@ main() {
   done
 
   if git pull --ff-only; then
+    # Refresh the shortcuts (in case the scripts moved)
+    for s in run upload update; do
+      printf '#!/bin/bash\nexec bash "%s/%s.sh" "$@"\n' \
+        "$C4P_SCRIPTS" "$s" > "$HOME/$s.sh"
+    done
     echo "Update complete."
     echo "Restart oTree (Ctrl+C in session 1, then ./run.sh)."
   else

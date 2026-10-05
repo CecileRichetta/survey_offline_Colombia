@@ -51,10 +51,10 @@ This is done once: the session survives restarts.
 
 Termux has two sessions (swipe from the left edge to see them):
 
-| Session | Command | What it does |
-|---|---|---|
-| [1] | `./run.sh` | Starts oTree. Leave it open. |
-| [2] (NEW SESSION) | `./upload.sh` | Sends the data to Geneva (needs internet). |
+| Session | Command            | What it does |
+|---|--------------------|---|
+| [1] | `cd ~ && ./run.sh` | Starts oTree. Leave it open. |
+| [2] (NEW SESSION) | `./upload.sh`      | Sends the data to Geneva (needs internet). |
 
 **Is oTree running?** Open an offline link. If it fails, type
 `./run.sh` in session [1].

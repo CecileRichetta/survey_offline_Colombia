@@ -4,7 +4,7 @@
 
 main() {
   source "$(dirname "$0")/config.sh"
-  local T="$C4P_PROJECT/offline"
+  local T="$C4P_SCRIPTS"
 
   echo "=== 1/6 Storage access ==="
   if [ ! -d "$HOME/storage" ] && command -v termux-setup-storage >/dev/null; then
@@ -81,6 +81,8 @@ main() {
 
   echo
   echo "Installation finished."
+  echo "First go back to the home folder by typing:  cd ~"
+  echo "Then:"
   echo "  ./run.sh     start oTree (session 1)"
   echo "  ./upload.sh  send the data (session 2)"
   echo "  ./update.sh  get the latest survey version"

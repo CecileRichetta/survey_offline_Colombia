@@ -23,7 +23,7 @@ git clone https://github.com/CecileRichetta/survey_offline_Colombia
 ```
 
 ```
-bash survey_offline_Colombia/tablet/install.sh
+bash survey_offline_Colombia/offline/install.sh
 ```
 
 During the installation:
@@ -81,11 +81,11 @@ cd ~/otree-experiments/survey_offline_Colombia
 ```
 
 ```
-git fetch && git checkout origin/master -- tablet
+git fetch && git checkout origin/master -- offline
 ```
 
 ```
-bash tablet/install.sh
+bash offline/install.sh
 ```
 
 ```

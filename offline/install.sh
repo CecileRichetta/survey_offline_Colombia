@@ -4,7 +4,7 @@
 
 main() {
   source "$(dirname "$0")/config.sh"
-  local T="$C4P_PROJECT/tablet"
+  local T="$C4P_PROJECT/offline"
 
   echo "=== 1/6 Storage access ==="
   if [ ! -d "$HOME/storage" ] && command -v termux-setup-storage >/dev/null; then

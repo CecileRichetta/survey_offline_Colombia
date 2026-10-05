@@ -144,11 +144,11 @@ class Player(BasePlayer):
 def extract_games_and_payoffs(p):
     # Read CSV manually
     if p.session.config['name'] == "session_C4P_SPANISH_w1":
-        with open("_static/data_internal/payoffs/games_pilot.csv", newline='') as f:
+        with open("data_internal/payoffs/games_pilot.csv", newline='') as f:
             reader = csv.DictReader(f)
             rows = list(reader)
     else:
-        with open("_static/data_internal/payoffs/games_wave_1.csv", newline='') as f:
+        with open("data_internal/payoffs/games_wave_1.csv", newline='') as f:
             reader = csv.DictReader(f)
             rows = list(reader)
 
@@ -263,6 +263,7 @@ class Page2(Page):
             ]
         else:
             return []
+    @staticmethod
     def before_next_page(player, timeout_happened):
         correct_answers_ultimatum(player)
 
@@ -295,8 +296,10 @@ class Page4(Page):
             ]
         else:
             return []
+    @staticmethod
     def before_next_page(player, timeout_happened):
         correct_answers_ultimatum(player)
+    @staticmethod
     def is_displayed(player):
         return player.ultimatum_correct_answers < 3 and player.ultimatum_redo_questions
 
@@ -313,9 +316,11 @@ class Page5_1(Page):
             ]
         else:
             pass
+    @staticmethod
     def is_displayed(player):
         participant = player.participant
         return participant.side_ultimatum==0
+    @staticmethod
     def before_next_page(player: Player, timeout_happened):
         participant = player.participant
         participant.decision_UG = player.decision_proposer
@@ -334,9 +339,11 @@ class Page5_2(Page):
             ]
         else:
             pass
+    @staticmethod
     def is_displayed(player):
         participant = player.participant
         return participant.side_ultimatum==1
+    @staticmethod
     def before_next_page(player: Player, timeout_happened):
         participant = player.participant
         participant.decision_UG = player.decision_receiver

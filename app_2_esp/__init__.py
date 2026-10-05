@@ -117,10 +117,6 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     # SOCIO-DEM VARIABLES
-    recall = models.StringField(
-        label="2.1. Por favor, ¿cuál es su nombre completo?",
-        blank=False
-    )
     age = models.IntegerField(
         label="2.2. Por favor, indique cuántos años tiene (en años):",
         min=48,
@@ -228,7 +224,6 @@ class Player(BasePlayer):
 class Page1(Page):
     form_model = 'player'
     form_fields = [
-        'recall',
         'age',
         'education',
         'education_other',
@@ -239,13 +234,10 @@ class Page1(Page):
         'religiosity',
         'insecurity'
     ]
+    @staticmethod
     def is_displayed(player: Player):
         return player.session.config['name'] == "session_C4P_SPANISH_w1"
-    def before_next_page(player, timeout_happened):
-        participant = player.participant
-        participant.recontact_1 = player.recall
-        participant.age = player.age
-        player.recall = "Anonymous"
+    @staticmethod
     def error_message(player, values):
         # Only validate religiosity if religion is NOT 7 AND NOT 999
         if values['religion'] != 7 and values['religion'] != 999:
@@ -265,6 +257,7 @@ class Page2(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.session.config['name'] == "session_C4P_SPANISH_w1"
+    @staticmethod
     def before_next_page(player: Player, timeout_happened):
         participant = player.participant
 #        participant.age = player.age

@@ -102,6 +102,12 @@ class C(BaseConstants):
         # Internal services in military units duties (cleaning; gardening; cooking; vehicule maintenance; driving; clerical work and paperwork; guard duties within compounds; military officers' aides)
         (999, 'No responde (no leer)')  # Prefer not to say
     ]
+    NON_MILITARY = [
+        (1, "Sacó la balota blanca en el sorteo."),
+        (2, "Por problemas de salud que impedían prestar el servicio militar."),
+        (3, "Sacó la balota elegible pero pagó por la libreta militar."),
+        (4, "Obtuvo el número de la lotería que lo hacía elegible, pero desertó.")
+    ]
     SCALE_EMPHASIS = [
         (0, "Nada"), # None
         (1, "Algo"), # Some
@@ -114,6 +120,7 @@ class C(BaseConstants):
         (1, "Frecuentemente"), # Often
         (999, "No responde (no leer)")  # Prefer not to say
     ]
+
 
 
 class Subsession(BaseSubsession):
@@ -233,6 +240,12 @@ class Player(BasePlayer):
         blank=False
     )
     # QUESTIONS NON-MILITARY
+    noncombatant_reason = models.IntegerField(
+        label="¿Cuál fue la razón por la cuál no prestó servicio militar?",
+        choices= C.NON_MILITARY,
+        widget=widgets.RadioSelect,
+        blank=False
+    )
     noncombatant_geography_main = models.IntegerField(
         label="3.2.1. Entre 1989 y 1996, ¿en qué departamento residió principalmente?",
         # 3.2.1. Between 1989 amd 1996, in which subregion did you primarily reside?
@@ -508,6 +521,7 @@ class Page1(Page):
             print(participant.treatment_other)
         else:
             pass
+    @staticmethod
     def is_displayed(player: Player):
         return player.session.config['name'] == "session_C4P_SPANISH_w1"
 
@@ -530,13 +544,16 @@ class Page2_1(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
         return participant.military_binary == 1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
+    @staticmethod
     def before_next_page(player, timeout_happened):
         participant = player.participant
         if participant.military_binary==1 & player.conscription_binary==1 :
             participant.etv = 1
+            participant.sample = 1
         else:
             participant.etv = 0
         assign_treatments(player, C.DATA_TREATMENT_LOC)
@@ -561,6 +578,7 @@ class Page2_1_2(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
         return participant.military_binary == 1 and player.deployment_second==1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
@@ -573,6 +591,7 @@ class Page2_2(Page):
         participant = player.participant
         if participant.military_binary != 1 and player.session.config['name'] == "session_C4P_SPANISH_w1":
             return [
+                'noncombatant_reason',
                 'noncombatant_geography_main',
                 'noncombatant_geography_main_start_year',
                 'noncombatant_geography_main_start_month',
@@ -582,9 +601,17 @@ class Page2_2(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
         return participant.military_binary != 1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        participant = player.participant
+        if player.noncombatant_reason == 1 :
+            participant.sample = 1
+        else:
+            participant.sample = 2
 
 class Page2_2_2(Page):
     form_model = 'player'
@@ -602,6 +629,7 @@ class Page2_2_2(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
         return participant.military_binary != 1 and player.field_maybe_none('noncombatant_geography_second_b')==1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
@@ -620,6 +648,7 @@ class Page3(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
         return participant.military_binary == 1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
@@ -673,8 +702,10 @@ class Page4(Page):
                 'etv_sc_9',
                 'etv_bi_10'
     ]
+    @staticmethod
     def is_displayed(player: Player):
         return player.session.config['name'] == "session_C4P_SPANISH_w1"
+    @staticmethod
     def error_message(player, values):
         pairs = [
             ('etv_bi_1', 'etv_sc_1'),

@@ -5,7 +5,7 @@ import shutil
 import re
 from functools import wraps
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 doc = """
 Final app 
@@ -19,6 +19,18 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TEMPLATE_DEBRIEF_FORM = '_static/texts_SPANISH/debrief_form.html'
+    TZ_COLOMBIA = timezone(timedelta(hours=-5))
+    #
+    PLATFORM_PAYMENT_1 = [
+        ("Daviplata", "Sí, Daviplata"),
+        ("Nequi", "Sí, Nequi"),
+        ("999", "No tengo ninguna de las dos, se girará a nombre de un tercero"),
+    ]
+    PLATFORM_PAYMENT_2 = [
+        ("Daviplata", "Daviplata"),
+        ("Nequi", "Nequi"),
+    ]
+
 
 
 class Subsession(BaseSubsession):
@@ -30,62 +42,56 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    payment_phone1 = models.StringField(
-        label="11.1. Para el pago de la compensación recibida por la encuesta y las actividades, le enviaremos dinero móvil. "
-              "¿A qué número de teléfono podemos enviarle el dinero?",
+    payment_platform_1 = models.StringField(
+        label="11.1. Para el pago de la compensación recibida por la encuesta y las actividades, "
+              "le enviaremos el dinero de forma electrónica. ¿Cuenta usted con Nequi o Daviplata?",
         # phone number for payment
-        blank=False
-    )
-    payment_email = models.StringField(
-        label="11.1.1. Por favor, proporcione una dirección de correo electrónico válida:",
-        blank=True
-    )
-    payment_cedula = models.StringField(
-        label="11.1.2. Número de cédula del receptor de la compensación:",
-        blank=False
-    )
-    payment_unica1 = models.StringField(
-        label="11.1.3. Este número telefónico está asignado a su cuenta de: Respuesta única",
-        choices=[
-            ("Daviplata", "1. Daviplata"),
-            ("Nequi", "2. Nequi"),
-            ("999", "999. Ninguno")
-        ],
+        choices=C.PLATFORM_PAYMENT_1,
         widget=widgets.RadioSelect,
         blank=False
     )
-    payment_unica2 = models.StringField(
-        label="11.1.4. Si la persona responde ninguno preguntar: Respuesta única",
-        choices=[
-            ("Bono éxito", "1. Bono éxito (encuestador alerta esta opción sólo elegirla si esta en ciudad principal)"),
-            ("Efecty", "2. Efecty")
-        ],
+    payment_phone_1 = models.StringField(
+        label="11.2 Indique el número de teléfono asociado a al que se le girará la compensación.",
+        blank=True
+    )
+    payment_platform_2 = models.StringField(
+        label="11.3 Indique si el tercero tiene su número de celular asociado a  Nequi o Daviplata",
+        choices=C.PLATFORM_PAYMENT_2,
         widget=widgets.RadioSelect,
         blank=True
     )
-    recall_firstwave = models.BooleanField(
-        label="11.2. Como se mencionó al inicio del cuestionario, este es un estudio en dos partes. "
-              "Para comunicarnos con usted, utilizaremos su nombre completo, número de teléfono y una dirección de correo electrónico."
-              "¿Le gustaría participar en la segunda etapa de esta encuesta?",
-        # As mentionned at the beginning of the questionnaire, this is a two-parts study. Would you like to participate in the second wave of this survey?
+    payment_phone_2 = models.StringField(
+        label="11.4. Indique el número de teléfono del tercero asociado a [Nequi/Daviplata] al que se le girará la compensación.",
+        blank=True
+    )
+    payment_name = models.StringField(
+        label="11.5 Nombre exacto de como se encuentra suscrito el Daviplata, Nequi de quién recibirá el giro.",
+        blank=False
+    )
+    recall_name = models.StringField(
+        label="11.6 Por favor, indique su nombre completo para el recontacto.",
+        blank=False
+    )
+    recall_phone_bi = models.IntegerField(
+        label="11.7 ¿El número de teléfono para el recontacto es el mismo que nos dio para el pago de la compensación?",
         choices=[
-            (True, "Sí"),
-            (False, "No")
+            (1, "Sí"),
+            (0, "No")
         ],
         widget=widgets.RadioSelect,
         blank=False
     )
-    recall_phone1 = models.IntegerField(
-        label="11.2.1. Por favor, proporcione un número telefónico de Contacto (puede ser diferente al que entrega de la compensación):",
+    recall_phone_2 = models.StringField(
+        label="11.8 Por favor, proporcione un número telefónico de contacto.",
         blank=True
     )
     recall_email = models.StringField(
-        label="11.2.2. Por favor, proporcione una dirección de correo electrónico válida (puede ser diferente al que entrega de la compensación):",
-        blank=True
+        label="11.9. Por favor, proporcione una dirección de correo electrónico válida.",
+        blank=False
     )
     recall_address = models.StringField(
-        label="11.2.3. Por favor, proporcione una dirección geográfica para el recontacto a la encuesta 2:",
-        blank=True
+        label="11.10 Por favor, proporcione una dirección geográfica para el recontacto a la fase II",
+        blank=False
     )
 
 
@@ -108,33 +114,35 @@ def simple_safe_operation(func):
 @simple_safe_operation
 def export_payoffs_headenumerator(player):
     participant = player.participant
-    data_folder = Path("_static/data_internal/payoffs")
-    timestamp = datetime.now().strftime("%Y_%m_%d_%H:%M")
+    data_folder = Path("data_internal/payoffs")
+    timestamp = datetime.now(C.TZ_COLOMBIA).strftime("%Y_%m_%d_%H:%M")
     csv_file_path = data_folder / "payoffs.csv"
     temp_file = csv_file_path.with_suffix('.tmp')
 
-    if player.payment_unica1 != "999":
-        participant.payment_unica = player.payment_unica1
+    if player.payment_platform_1 != "999":
+        participant.payment_platform = player.payment_platform_1
+        participant.payment_phone = player.payment_phone_1
+        participant.payment_phone = clean_phone(participant.payment_phone)
     else:
-        participant.payment_unica = player.payment_unica2
+        participant.payment_platform = player.payment_platform_2
+        participant.payment_phone = player.payment_phone_2
+        participant.payment_phone = clean_phone(participant.payment_phone)
 
     # Create directory if it doesn't exist
     data_folder.mkdir(parents=True, exist_ok=True)
 
     fieldnames = [
-        'participant_label', 'date_interview', 'participant_number',
-        'participant_email', 'participant_cedula', 'participant_unica',
-        'participation_fee',
-        'payoff_games', 'total_compensation'
+        'participant_label', 'date_interview', 'payment_name',
+        'payment_platform', 'payment_number',
+        'participation_fee', 'payoff_games', 'total_compensation'
     ]
     new_row = {
         'participant_label': participant.label,
         'date_interview': timestamp,
-        'participant_number': player.payment_phone1,
-        'participant_email': player.payment_email,
-        'participant_cedula': player.payment_cedula,
-        'participant_unica': participant.payment_unica,
-        'participation_fee':participant.participation_fee,
+        'payment_name': player.payment_name,
+        'payment_platform': participant.payment_platform,
+        'payment_number': participant.payment_phone,
+        'participation_fee': participant.participation_fee,
         'payoff_games': participant.payoff_games,
         'total_compensation': participant.total_compensation
     }
@@ -158,11 +166,11 @@ def export_payoffs_headenumerator(player):
         # Replace original with temp
         os.replace(temp_file, csv_file_path)
 
-        player.payment_phone1 = "Anonymous"
-        player.payment_email = "Anonymous"
-        player.payment_cedula = "Anonymous"
-        player.payment_unica1 = "Anonymous"
-        player.payment_unica2 = "Anonymous"
+        player.payment_phone_1 = "Anonymous"
+        player.payment_phone_2 = "Anonymous"
+        player.payment_platform_1 = "Anonymous"
+        player.payment_platform_2 = "Anonymous"
+        player.payment_name = "Anonymous"
 
     except Exception as e:
         if temp_file.exists():
@@ -173,16 +181,24 @@ def export_payoffs_headenumerator(player):
 @simple_safe_operation
 def export_recall(player):
     participant = player.participant
-    data_folder = Path("_static/data_internal/for_wave_2")
+    data_folder = Path("data_internal/for_wave_2")
     csv_file_path = data_folder / "recall.csv"
     temp_file = csv_file_path.with_suffix('.tmp')
     # Create directory if it doesn't exist
     data_folder.mkdir(parents=True, exist_ok=True)
+
+    if player.recall_phone_bi == 0:
+        participant.recall_phone = player.recall_phone_2
+        participant.recall_phone = clean_phone(participant.recall_phone)
+    else:
+        participant.recall_phone = participant.payment_phone
+        participant.recall_phone = clean_phone(participant.recall_phone)
+
     try:
         new_data = {
             'participant_label': participant.label,
-            'participant_name': participant.recontact_1,
-            'participant_phone': player.recall_phone1,
+            'participant_name': player.recall_name,
+            'participant_phone': participant.recall_phone,
             'participant_email': player.recall_email,
             'participant_address': player.recall_address
         }
@@ -213,8 +229,9 @@ def export_recall(player):
         shutil.move(temp_file, csv_file_path)
 
         # Si tout va bien, effacer les données
-        participant.recontact_1 = "Anonymous"
-        player.recall_phone1 = 111
+        participant.recall_phone = "Anonymous"
+        participant.payment_phone = "Anonymous"
+        player.recall_name = "Anonymous"
         player.recall_email = "Anonymous"
         player.recall_address = "Anonymous"
 
@@ -225,6 +242,74 @@ def export_recall(player):
         print(f"Erreur dans export_recall: {e}")
         raise e
 
+def export_interviews_per_group(player):
+    participant = player.participant
+    data_folder = Path("data_internal/tracking")
+    csv_file_path = data_folder / "interviews_per_group.csv"
+    temp_file = csv_file_path.with_suffix('.tmp')
+
+    data_folder.mkdir(parents=True, exist_ok=True)
+
+    group_label = f"grupo_{participant.sample}"
+    enumerator_id = participant.enumerator
+    supervisor_id = participant.supervisor
+
+    fieldnames = ['supervisor_id','enumerator_id', 'group', 'nb_interviews']
+
+    try:
+        rows = []
+        found = False
+
+        if csv_file_path.exists():
+            # Read all existing rows
+            with open(csv_file_path, mode='r', newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row['supervisor_id'] == str(supervisor_id) and row['enumerator_id'] == str(enumerator_id) and row['group'] == group_label:
+                        # Row exists: increment
+                        row['nb_interviews'] = int(row['nb_interviews']) + 1
+                        found = True
+                    rows.append(row)
+
+        if not found:
+            # Row doesn't exist: add new one
+            rows.append({
+                'supervisor_id': supervisor_id,
+                'enumerator_id': enumerator_id,
+                'group': group_label,
+                'nb_interviews': 1
+            })
+
+        # Write to temp file first
+        with open(temp_file, mode='w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+        # Atomically replace original with temp
+        shutil.move(str(temp_file), str(csv_file_path))
+
+    except Exception as e:
+        if temp_file.exists():
+            os.remove(temp_file)
+        print(f"Error in export_interviews_per_group: {e}")
+        raise e
+
+def clean_phone(raw):
+    """Strip spaces, dashes, dots and parentheses, plus an optional +57 / 57 prefix."""
+    digits = re.sub(r'[\s\-\.\(\)]', '', raw or '')
+    if digits.startswith('+57'):
+        digits = digits[3:]
+    elif digits.startswith('57') and len(digits) == 12:
+        digits = digits[2:]
+    return digits
+
+def is_mobile_co(raw):
+    return re.fullmatch(r'3\d{9}', clean_phone(raw)) is not None
+
+def is_phone_co(raw):
+    # mobile (3XXXXXXXXX) or landline (60XXXXXXXX)
+    return re.fullmatch(r'(3\d{9}|60\d{8})', clean_phone(raw)) is not None
 
 # PAGES
 class Page1_1(Page):
@@ -235,50 +320,69 @@ class Page1_1(Page):
         # Wave 1: all fields including recall
         if participant.dropout is False and player.session.config['name'] == "session_C4P_SPANISH_w1":
             return [
-                'payment_phone1',
-                'payment_email',
-                'payment_cedula',
-                'payment_unica1',
-                'payment_unica2',
-                'recall_firstwave',
-                'recall_phone1',
+                'payment_platform_1',
+                'payment_phone_1',
+                'payment_platform_2',
+                'payment_phone_2',
+                'payment_name',
+                'recall_name',
+                'recall_phone_bi',
+                'recall_phone_2',
                 'recall_email',
-                'recall_address'
+                'recall_address',
             ]
         # Wave 2: payment fields only
         elif participant.dropout is False and player.session.config['name'] == "session_C4P_SPANISH_w2":
             return [
-                'payment_phone1',
-                'payment_email',
-                'payment_cedula',
-                'payment_unica1',
-                'payment_unica2'
+                'payment_platform_1',
+                'payment_phone_1',
+                'payment_platform_2',
+                'payment_phone_2',
+                'payment_name',
             ]
+    @staticmethod
+    def vars_for_template(player):
+        return dict(
+            is_wave1=player.session.config['name'] == "session_C4P_SPANISH_w1"
+        )
+    @staticmethod
     def before_next_page(player, timeout_happened):
         export_payoffs_headenumerator(player)
-        # Only export recall for wave 1
-        if player.session.config['name'] == "session_C4P_SPANISH_w1":
-            if player.recall_firstwave is True:
-                export_recall(player)
+        export_recall(player)
+        export_interviews_per_group(player)
+    @staticmethod
     def is_displayed(player):
         participant = player.participant
         return (not participant.dropout) and (
                 player.session.config['name'] == "session_C4P_SPANISH_w1" or
                 player.session.config['name'] == "session_C4P_SPANISH_w2"
         )
+    @staticmethod
     def error_message(player, values):
-        # Validate payment_unica2: required if payment_unica1 == "999"
-        if 'payment_unica1' in values and values['payment_unica1'] == '999':
-            if not values.get('payment_unica2') or values['payment_unica2'].strip() == '':
-                return 'Por favor seleccione una opción de pago alternativa.'
-        # Validate recall fields: required if recall_firstwave == True (only in wave 1)
-        if 'recall_firstwave' in values and values['recall_firstwave'] == True:
-            if not values.get('recall_phone1') or values['recall_phone1'] is None:
-                return 'Por favor indique un número telefónico de contacto.'
-            if not values.get('recall_email') or values['recall_email'].strip() == '':
-                return 'Por favor indique una dirección de correo electrónico.'
-            if not values.get('recall_address') or values['recall_address'].strip() == '':
-                return 'Por favor indique una dirección geográfica para el recontacto.'
+        MSG_MOBILE = ('Por favor, indique un número de celular válido: '
+                      '10 dígitos que empiezan por 3 (ej. 300 123 4567).')
+        MSG_PHONE = ('Por favor, indique un número de teléfono válido: '
+                     '10 dígitos (celular que empieza por 3, o fijo que empieza por 60).')
+
+        p1 = values.get('payment_platform_1')
+        if p1 and p1 != '999':
+            if not (values.get('payment_phone_1') or '').strip():
+                return 'Por favor, indique un número de teléfono.'
+            if not is_mobile_co(values['payment_phone_1']):
+                return MSG_MOBILE
+        if p1 == '999':
+            if not values.get('payment_platform_2'):
+                return 'Por favor, elija una plataforma de pago.'
+            if not (values.get('payment_phone_2') or '').strip():
+                return 'Por favor, indique un número de teléfono.'
+            if not is_mobile_co(values['payment_phone_2']):
+                return MSG_MOBILE
+        if values.get('recall_phone_bi') == 0:
+            if not (values.get('recall_phone_2') or '').strip():
+                return 'Por favor, indique un número de teléfono.'
+            if not is_phone_co(values['recall_phone_2']):
+                return MSG_PHONE
+
 
 class Page1_2(Page):
     pass
@@ -293,7 +397,6 @@ class Page2(Page):
     def is_displayed(player):
         participant = player.participant
         return (not participant.dropout) and (
-                (player.field_maybe_none('recall_firstwave') is False and participant.treatment_hope == 1) or
                 (player.session.config['name'] == "session_C4P_SPANISH_w2" and participant.treatment_hope == 1)
         )
 

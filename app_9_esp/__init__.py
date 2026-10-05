@@ -1,4 +1,8 @@
 from otree.api import *
+import csv
+import os
+import threading
+from pathlib import Path
 
 doc = """
 Support for peace agreement provisions. 
@@ -38,6 +42,11 @@ class C(BaseConstants):
         (1, "2. Fundación Pies Descalzos (Educación y desarrollo infantil)"),
         (2, "3. TECHO Colombia (Vivienda y desarrollo comunitario)")
     ]
+    NGO_CSV_NAMES = {
+        0: "Asomujer y Trabajo",
+        1: "Fundación Pies Descalzos",
+        2: "TECHO Colombia",
+    }
     HOPE_SCALE = [
         (0, "Muy desesperanzado"), # Very hopeless
         (1, "Desesperanzado"), # Hopeless
@@ -173,7 +182,47 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect
     )
 
+_ngo_lock = threading.Lock()
 
+def update_ngo_totals(player):
+    """Add the player's donation to the matching NGO's total in payment_ngo.csv."""
+    # Only count real donations
+    if not player.field_maybe_none('ngo_binary'):
+        return
+    amount = player.field_maybe_none('ngo_amount')
+    ngo_id = player.field_maybe_none('ngo_name')
+    if amount is None or ngo_id is None or amount <= 0 or amount == 997:
+        return
+
+    data_folder = Path("data_internal/tracking")
+    csv_file_path = data_folder / "payment_ngo.csv"
+    temp_file = csv_file_path.with_suffix('.tmp')
+    data_folder.mkdir(parents=True, exist_ok=True)
+
+    with _ngo_lock:
+        try:
+            # Start from zero for each NGO, then load existing totals
+            totals = {name: 0 for name in C.NGO_CSV_NAMES.values()}
+            if csv_file_path.exists():
+                with open(csv_file_path, 'r', newline='', encoding='utf-8-sig') as f:
+                    for row in csv.DictReader(f):
+                        totals[row['ngo']] = int(float(row['total'] or 0))
+
+            # Add this donation
+            totals[C.NGO_CSV_NAMES[ngo_id]] += amount
+
+            # Write to temp file, then replace the original
+            with open(temp_file, 'w', newline='', encoding='utf-8-sig') as f:
+                writer = csv.DictWriter(f, fieldnames=['ngo', 'total'])
+                writer.writeheader()
+                for name, total in totals.items():
+                    writer.writerow({'ngo': name, 'total': total})
+            os.replace(temp_file, csv_file_path)
+
+        except Exception as e:
+            if temp_file.exists():
+                os.remove(temp_file)
+            print(f"Erreur dans update_ngo_totals: {e}")
 
 # PAGES
 class Page1(Page):
@@ -206,6 +255,7 @@ class Page2(Page):
         else:
             participant.participation_fee= C.PARTICIPATION_FEE
         participant.total_compensation = participant.participation_fee + participant.payoff_games
+    @staticmethod
     def error_message(player, values):
         # If they want to donate (ngo_binary == True), they must specify amount and NGO
         if values['ngo_binary'] == True:
@@ -222,6 +272,15 @@ class Page2(Page):
                 return '9.9. Por favor, introduzca un múltiplo de 100 (p. ej., 100, 200, 300...).'
         except ValueError:
             return 'Por favor, introduzca un número entero válido.'
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        participant = player.participant
+        if player.ngo_binary == True and player.ngo_amount != 997:
+            participant.participation_fee = C.PARTICIPATION_FEE - player.ngo_amount
+        else:
+            participant.participation_fee = C.PARTICIPATION_FEE
+        participant.total_compensation = participant.participation_fee + participant.payoff_games
+        update_ngo_totals(player)
 
 class Page3(Page):
     form_model = 'player'

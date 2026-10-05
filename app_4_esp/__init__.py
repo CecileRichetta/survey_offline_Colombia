@@ -68,6 +68,7 @@ class Page1_1(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player):
         participant = player.participant
         return participant.treatment_hope == 1 and player.session.config['name'] == "session_C4P_SPANISH_w1"
@@ -85,6 +86,7 @@ class Page1_2(Page):
             ]
         else:
             return []
+    @staticmethod
     def is_displayed(player):
         participant = player.participant
         return participant.treatment_hope == 0 and player.session.config['name'] == "session_C4P_SPANISH_w1"

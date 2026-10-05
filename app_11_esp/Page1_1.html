@@ -1,39 +1,40 @@
-{{ block scripts }}
-<!doctype html>
-<html lang="en">
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        .progress-text {
-            text-align: right;
-            color: grey;
-            font-size: 11px;
-            width: 100%; /* Ensures the text spans the full width of its container */
-        }
-        .btn-primary {
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-        }
-        .text-center {
-            text-align: center;
-        }
-    </style>
-
+{{ block styles }}
+<style>
+    .section-title {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid #0d6efd;
+    color: #0d6efd;
+}
+    .progress-text {
+        text-align: right;
+        color: grey;
+        font-size: 11px;
+        width: 100%;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+    .text-center {
+        text-align: center;
+    }
+</style>
 {{ endblock }}
 
 {{ block title }}
-        <p class="progress-text" >
-            Progreso del cuestionario módulo 12/12
-        </p>
+    <p class="progress-text">
+        Progreso del cuestionario módulo 12/12
+    </p>
 {{ endblock }}
 
 {{ block content }}
@@ -41,139 +42,110 @@
         <b>Información del contacto</b>
     </h3>
 
+    <!-- SECCIÓN A -->
+    <h4 class="section-title"><b>Sección A - Pago de la compensación</b></h4>
     <h5>
-        <p>
-            {{ formfields }}
-        </p>
+        {{ formfield 'payment_platform_1' }}
+        {{ formfield 'payment_phone_1' }}
+        {{ formfield 'payment_platform_2' }}
+        {{ formfield 'payment_phone_2' }}
+        {{ formfield 'payment_name' }}
     </h5>
 
+    <!-- SECCIÓN B (solo ola 1) -->
+    {{ if is_wave1 }}
+        <h4 class="section-title"><b>Sección B - Participación en la segunda etapa</b></h4>
+        <p>
+            Como se mencionó al inicio del cuestionario, este es un estudio en dos partes.
+            Le informamos que habrá una segunda etapa de esta encuesta y que nos pondremos
+            en contacto con usted. Quienes participen en la segunda etapa podrán recibir la
+            misma compensación por participar. Para comunicarnos con usted, utilizaremos su
+            nombre completo, número de teléfono y una dirección de correo electrónico, que
+            le solicitaremos a continuación.
+        </p>
+        <h5>
+            {{ formfield 'recall_name' }}
+            {{ formfield 'recall_phone_bi' }}
+            {{ formfield 'recall_phone_2' }}
+            {{ formfield 'recall_email' }}
+            {{ formfield 'recall_address' }}
+        </h5>
+    {{ endif }}
+
+    <p class="text-center">
+        <button class="btn btn-primary">SIGUIENTE</button>
+    </p>
+{{ endblock }}
+
+{{ block scripts }}
 <script>
-    // Polyfill for closest() for older browsers
-    if (!Element.prototype.closest) {
-        Element.prototype.closest = function(s) {
-            var el = this;
-            do {
-                if (el.matches && el.matches(s)) return el;
-                el = el.parentElement || el.parentNode;
-            } while (el !== null && el.nodeType === 1);
-            return null;
-        };
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Find the block (label + input) that wraps a field, using its name
+    function getContainer(fieldName) {
+        var input = document.querySelector('[name="' + fieldName + '"]');
+        if (!input) return null;  // field not on this page (e.g. wave 2)
+        var el = input.parentElement;
+        // Climb until we reach the element that also contains the label
+        while (el && el !== document.body) {
+            if (el.querySelector('label') && el.querySelector('[name="' + fieldName + '"]')
+                && (el.classList.contains('_formfield') || el.classList.contains('mb-3')
+                    || el.classList.contains('form-group'))) {
+                return el;
+            }
+            el = el.parentElement;
+        }
+        return input.parentElement;
     }
 
-    // Polyfill for matches() for older browsers
-    if (!Element.prototype.matches) {
-        Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+    // Value of a radio group ('' if nothing selected)
+    function radioValue(fieldName) {
+        var checked = document.querySelector('input[name="' + fieldName + '"]:checked');
+        return checked ? checked.value : '';
     }
 
-    // Function to find and hide field by label text
-    function hideFieldByLabel(fieldName, labelTextPart) {
-        var labels = document.querySelectorAll('label');
-        for (var i = 0; i < labels.length; i++) {
-            var label = labels[i];
-            if (label.textContent.indexOf(labelTextPart) !== -1) {
-                var parent = label.parentElement;
-                var attempts = 0;
-                while (parent && parent !== document.body && attempts < 10) {
-                    var field = parent.querySelector('input[name="' + fieldName + '"], select[name="' + fieldName + '"], textarea[name="' + fieldName + '"]');
-                    if (field) {
-                        parent.style.display = 'none';
-                        parent.setAttribute('data-conditional-field', fieldName);
-                        break;
-                    }
-                    parent = parent.parentElement;
-                    attempts++;
+    // Show or hide a field; when hiding, also clear its value
+    function setVisible(fieldName, visible) {
+        var box = getContainer(fieldName);
+        if (!box) return;
+        box.style.display = visible ? '' : 'none';
+        if (!visible) {
+            var inputs = box.querySelectorAll('[name="' + fieldName + '"]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type === 'radio' || inputs[i].type === 'checkbox') {
+                    inputs[i].checked = false;
+                } else {
+                    inputs[i].value = '';
                 }
-                if (parent && parent.getAttribute('data-conditional-field')) break;
             }
         }
     }
 
-    // Function to toggle payment_unica2 based on payment_unica1 selection
-    function togglePaymentUnica2() {
-        var unica1Selects = document.querySelectorAll('select[name="payment_unica1"], input[name="payment_unica1"]');
-        var unica2Container = document.querySelector('[data-conditional-field="payment_unica2"]');
-
-        if (!unica2Container) {
-            return;
-        }
-
-        // Check initial state
-        var selectedOption = document.querySelector('select[name="payment_unica1"]');
-        if (selectedOption && selectedOption.value === '999') {
-            unica2Container.style.display = '';
-        } else {
-            unica2Container.style.display = 'none';
-        }
-
-        // Add event listeners
-        for (var i = 0; i < unica1Selects.length; i++) {
-            unica1Selects[i].addEventListener('change', function() {
-                if (this.value === '999') {
-                    unica2Container.style.display = '';
-                } else {
-                    unica2Container.style.display = 'none';
-                }
-            });
-        }
+    function updatePayment() {
+        var p1 = radioValue('payment_platform_1');
+        // payment_phone_1: only if a platform is chosen and it is not "999"
+        setVisible('payment_phone_1', p1 !== '' && p1 !== '999');
+        // payment_platform_2 + payment_phone_2: only if "999"
+        setVisible('payment_platform_2', p1 === '999');
+        setVisible('payment_phone_2', p1 === '999');
     }
 
-    // Function to toggle recall fields based on recall_firstwave selection
-    function toggleRecallFields() {
-        var recallRadios = document.querySelectorAll('input[name="recall_firstwave"]');
-        var phoneContainer = document.querySelector('[data-conditional-field="recall_phone1"]');
-        var emailContainer = document.querySelector('[data-conditional-field="recall_email"]');
-        var addressContainer = document.querySelector('[data-conditional-field="recall_address"]');
-
-        if (!phoneContainer || !emailContainer || !addressContainer) {
-            return;
-        }
-
-        // Check initial state
-        var selectedRadio = document.querySelector('input[name="recall_firstwave"]:checked');
-        if (selectedRadio && selectedRadio.value === 'True') {
-            phoneContainer.style.display = '';
-            emailContainer.style.display = '';
-            addressContainer.style.display = '';
-        } else {
-            phoneContainer.style.display = 'none';
-            emailContainer.style.display = 'none';
-            addressContainer.style.display = 'none';
-        }
-
-        // Add event listeners
-        for (var i = 0; i < recallRadios.length; i++) {
-            recallRadios[i].addEventListener('change', function() {
-                if (this.value === 'True') {
-                    phoneContainer.style.display = '';
-                    emailContainer.style.display = '';
-                    addressContainer.style.display = '';
-                } else {
-                    phoneContainer.style.display = 'none';
-                    emailContainer.style.display = 'none';
-                    addressContainer.style.display = 'none';
-                }
-            });
-        }
+    function updateRecall() {
+        // recall_phone_2: only if recall_phone_bi == 0
+        setVisible('recall_phone_2', radioValue('recall_phone_bi') === '0');
     }
 
-    // First hide all conditional fields and mark them
-    hideFieldByLabel('payment_unica2', '11.1.4. Si la persona responde ninguno preguntar: Respuesta única');
-    hideFieldByLabel('recall_phone1', '11.2.1. Por favor, proporcione un número telefónico de Contacto (puede ser diferente al que entrega de la compensación):');
-    hideFieldByLabel('recall_email', '11.2.2. Por favor, proporcione una dirección de correo electrónico válida (puede ser diferente al que entrega de la compensación):');
-    hideFieldByLabel('recall_address', '11.2.3. Por favor, proporcione una dirección geográfica para el recontacto a la encuesta 2:');
+    // Listen for changes on the radio buttons
+    document.querySelectorAll('input[name="payment_platform_1"]').forEach(function (r) {
+        r.addEventListener('change', updatePayment);
+    });
+    document.querySelectorAll('input[name="recall_phone_bi"]').forEach(function (r) {
+        r.addEventListener('change', updateRecall);
+    });
 
-    // Then set up the toggles
-    togglePaymentUnica2();
-    toggleRecallFields();
+    // Set the initial state (also correct after an error_message reload)
+    updatePayment();
+    updateRecall();
+});
 </script>
-
-    <p class="text-center">
-        <button class="btn btn-primary">
-            SIGUIENTE
-        </button>
-    </p>
-{{ endblock }}
-
-{{ block options }}
-</html>
 {{ endblock }}

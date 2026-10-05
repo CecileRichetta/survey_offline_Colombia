@@ -32,10 +32,6 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    participant_id_enum = models.StringField(
-        label="Participant ID:",
-        blank=False
-    )
     enumerator_id = models.StringField(
         label="Ingrese su identificador de encuestador", # enter your enumerator identifier
         blank=False
@@ -44,12 +40,10 @@ class Player(BasePlayer):
         label="Ingrese su nombre de encuestador",
         blank=False
     )
-    timestamp = models.StringField()
-    consent = models.BooleanField(choices=[[True, 'Estoy dispuesto a participar en este estudio.'],
-                                           [False, 'No estoy dispuesto a participar en este estudio.']],
-                                  label='Confirmo que he entendido la información anterior y...',
-                                  widget=widgets.RadioSelect)
-    p_label = models.StringField()
+    supervisor_id = models.StringField(
+        label="Ingrese su nombre de supervisor",
+        blank=False
+    )
     city = models.StringField(
         label="Ingrese su ciudad donde se esta realizando la encuesta:",
         blank=False
@@ -66,13 +60,19 @@ class Player(BasePlayer):
         label="Manzana",
         blank=True
     )
+    timestamp = models.StringField()
+    consent = models.BooleanField(choices=[[True, 'Estoy dispuesto a participar en este estudio.'],
+                                           [False, 'No estoy dispuesto a participar en este estudio.']],
+                                  label='Confirmo que he entendido la información anterior y...',
+                                  widget=widgets.RadioSelect)
+    p_label = models.StringField()
 
 
 
 # FUNCTIONS
 def extract_participant_w1(p):
     participant = p.participant
-    with open("_static/data_internal/for_wave_2/participant_wave_1.csv", 'r') as file:
+    with open("data_internal/for_wave_2/participant_wave_1.csv", 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if row['Participant_label'] == participant.label:
@@ -89,25 +89,21 @@ class Page0(Page):
 
 class Page1(Page):
     form_model = 'player'
+    form_fields = [
+        'enumerator_id',
+        'enumerator_name',
+        'supervisor_id',
+        'city',
+        'sector',
+        'seccion',
+        'manzana'
+    ]
     @staticmethod
-    def get_form_fields(player):
-        if player.session.config['name'] == "session_C4P_SPANISH_w1":
-            return [
-                'enumerator_id',
-                'enumerator_name',
-                'city',
-                'sector',
-                'seccion',
-                'manzana'
-            ]
-        else:
-            return [
-                'enumerator_id',
-                'enumerator_name'
-            ]
     def before_next_page(player, timeout_happened):
         participant = player.participant
         participant.participation_fee = 30000
+        participant.supervisor = player.supervisor_id
+        participant.enumerator = player.enumerator_id
 #        if player.session.config['name'] == "session_C4P_SPANISH_w1":
 #            participant.age = player.module_0_age
 #    def error_message(player, values):
@@ -139,6 +135,8 @@ class Page2(Page):
             extract_participant_w1(player)
         else:
             pass
+
+    @staticmethod
     def app_after_this_page(player: Player, upcoming_apps):
         if not player.consent:
             participant = player.participant

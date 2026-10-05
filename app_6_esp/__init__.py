@@ -152,7 +152,7 @@ def simple_safe_operation(func):
 @simple_safe_operation
 def export_participant_data_append_only(player):
     participant = player.participant
-    data_folder = Path("_static/data_internal/for_wave_2")
+    data_folder = Path("data_internal/for_wave_2")
 
     if player.session.config['name'] == "session_C4P_SPANISH_w1":
         csv_file_path = data_folder / "participant_wave_1.csv"
@@ -200,7 +200,7 @@ def export_participant_data_append_only(player):
 def export_games_data_append_only(player):
     """Version sécurisée des games data"""
     participant = player.participant
-    data_folder = Path("_static/data_internal/payoffs")
+    data_folder = Path("data_internal/payoffs")
 
     if player.session.config['name'] == "session_C4P_SPANISH_w1":
         csv_file_path = data_folder / "games_wave_1.csv"
@@ -327,6 +327,7 @@ class Page3(Page):  # re-read instructions PG
     def before_next_page(player, timeout_happened):
         correct_answers_pg(player)
 
+    @staticmethod
     def is_displayed(player):
         return player.pg_correct_answers < 3 and player.pg_redo_questions
 

@@ -1,3 +1,5 @@
+from random import choices
+
 from otree.api import *
 import csv
 import os
@@ -30,7 +32,12 @@ class C(BaseConstants):
         ("Daviplata", "Daviplata"),
         ("Nequi", "Nequi"),
     ]
-
+    CONTACT_SOURCE = [
+        (1, "Muestra cartográfica"),
+        (2, "Referido de otro encuestado"),
+        (3, "Líder o representante comunitario"),
+        (4, "Institución (fuerza pública, educativa, gremio)")
+    ]
 
 
 class Subsession(BaseSubsession):
@@ -93,7 +100,12 @@ class Player(BasePlayer):
         label="11.10 Por favor, proporcione una dirección geográfica para el recontacto a la fase II",
         blank=False
     )
-
+    contact_source = models.IntegerField(
+        label="11.11 Solo para el encuestador: ¿Cómo se contactó a la persona encuestada?",
+        choices=C.CONTACT_SOURCE,
+        widget=widgets.RadioSelect,
+        blank=False
+    )
 
 # DECORATEUR
 # VERSION SIMPLE ET ROBUSTE pour tes fonctions
@@ -401,7 +413,8 @@ class Page2(Page):
         )
 
 class Page3(Page):
-    pass
+    form_model = 'player'
+    form_fields = ["contact_source"]
 
 page_sequence = [
     Page1_1,

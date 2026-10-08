@@ -41,15 +41,18 @@
     </h3>
     <h5>
         <p class="text-center">
-        Participation fee: {{ participant.vars.participation_fee }} COP <br><br>
-            {{ if session.config.name == "session_C4P_SPANISH_w1" }}
-                {{ if not participant.vars.dropout }}
-                    <br><br>
+            Participation fee: {{ participant.vars.participation_fee }} COP <br><br>
+                {{ if session.config.name == "session_C4P_SPANISH_w1" }}
+                    {{ if not participant.vars.dropout }}
+                        <br><br>
+                    {{ endif }}
                 {{ endif }}
-            {{ endif }}
-        <button class="btn btn-primary">
-            SALIDA
-        </button>
+        </p>
+            {{ formfields }} <br>
+        <p class="text-center">
+            <button class="btn btn-primary">
+                SALIDA
+            </button>
         </p>
     </h5>
 

@@ -68,19 +68,27 @@ class Player(BasePlayer):
         blank=True
     )
     payment_phone_2 = models.StringField(
-        label="11.4. Indique el número de teléfono del tercero asociado a [Nequi/Daviplata] al que se le girará la compensación.",
+        label="11.4 Indique el número de teléfono del tercero asociado a [Nequi/Daviplata] al que se le girará la compensación.",
         blank=True
     )
     payment_name = models.StringField(
         label="11.5 Nombre exacto de como se encuentra suscrito el Daviplata, Nequi de quién recibirá el giro.",
         blank=False
     )
+    id_number = models.StringField(
+        label="11.6 Indíqueme el número de cédula de la persona que recibirá la compensación",
+        blank=False
+    )
+    payment_address = models.StringField(
+        label="11.7 Indíqueme dirección de residencia de la persona que recibirá la compensación",
+        blank=False
+    )
     recall_name = models.StringField(
-        label="11.6 Por favor, indique su nombre completo para el recontacto.",
+        label="11.8 Por favor, indique su nombre completo para el recontacto.",
         blank=False
     )
     recall_phone_bi = models.IntegerField(
-        label="11.7 ¿El número de teléfono para el recontacto es el mismo que nos dio para el pago de la compensación?",
+        label="11.9 ¿El número de teléfono para el recontacto es el mismo que nos dio para el pago de la compensación?",
         choices=[
             (1, "Sí"),
             (0, "No")
@@ -89,19 +97,19 @@ class Player(BasePlayer):
         blank=False
     )
     recall_phone_2 = models.StringField(
-        label="11.8 Por favor, proporcione un número telefónico de contacto.",
+        label="11.10 Por favor, proporcione un número telefónico de contacto.",
         blank=True
     )
     recall_email = models.StringField(
-        label="11.9. Por favor, proporcione una dirección de correo electrónico válida.",
+        label="11.11 Por favor, proporcione una dirección de correo electrónico válida.",
         blank=False
     )
     recall_address = models.StringField(
-        label="11.10 Por favor, proporcione una dirección geográfica para el recontacto a la fase II",
+        label="11.12 Por favor, proporcione una dirección geográfica para el recontacto a la fase II",
         blank=False
     )
     contact_source = models.IntegerField(
-        label="11.11 Solo para el encuestador: ¿Cómo se contactó a la persona encuestada?",
+        label="11.13 Solo para el encuestador: ¿Cómo se contactó a la persona encuestada?",
         choices=C.CONTACT_SOURCE,
         widget=widgets.RadioSelect,
         blank=False
@@ -122,6 +130,22 @@ def simple_safe_operation(func):
             # Log l'erreur mais ne crash pas le participant
             return None
     return wrapper
+
+def set_aside_if_old_header(csv_file_path, fieldnames):
+    """
+    If an existing CSV has different columns (e.g. payoffs.csv created by an
+    older version of the survey), rename it to <name>_old_<time>.csv so that
+    new rows never end up under the wrong column names. Nothing is deleted.
+    """
+    if not csv_file_path.exists():
+        return
+    with open(csv_file_path, 'r', newline='', encoding='utf-8-sig') as f:
+        header = next(csv.reader(f), None)
+    if header is not None and header != fieldnames:
+        stamp = datetime.now(C.TZ_COLOMBIA).strftime("%Y%m%d_%H%M%S")
+        os.replace(csv_file_path,
+                   csv_file_path.with_name(f"{csv_file_path.stem}_old_{stamp}.csv"))
+
 
 @simple_safe_operation
 def export_payoffs_headenumerator(player):
@@ -146,14 +170,18 @@ def export_payoffs_headenumerator(player):
     fieldnames = [
         'participant_label', 'date_interview', 'payment_name',
         'payment_platform', 'payment_number',
+        'id_number', 'payment_address',
         'participation_fee', 'payoff_games', 'total_compensation'
     ]
+    set_aside_if_old_header(csv_file_path, fieldnames)
     new_row = {
         'participant_label': participant.label,
         'date_interview': timestamp,
         'payment_name': player.payment_name,
         'payment_platform': participant.payment_platform,
         'payment_number': participant.payment_phone,
+        'id_number': player.id_number.strip(),
+        'payment_address': player.payment_address.strip(),
         'participation_fee': participant.participation_fee,
         'payoff_games': participant.payoff_games,
         'total_compensation': participant.total_compensation
@@ -183,6 +211,10 @@ def export_payoffs_headenumerator(player):
         player.payment_platform_1 = "Anonymous"
         player.payment_platform_2 = "Anonymous"
         player.payment_name = "Anonymous"
+        player.id_number = "Anonymous"
+        player.payment_address = "Anonymous"
+        participant.id_number = "Anonymous"
+        participant.payment_address = "Anonymous"
 
     except Exception as e:
         if temp_file.exists():
@@ -262,7 +294,9 @@ def export_interviews_per_group(player):
 
     data_folder.mkdir(parents=True, exist_ok=True)
 
-    group_label = f"grupo_{participant.sample}"
+    # .get(): 'sample' is never set in wave 2 (and in some wave-1 paths),
+    # and reading an unset participant field crashes the page.
+    group_label = f"grupo_{participant.vars.get('sample', 'NA')}"
     enumerator_id = participant.enumerator
     supervisor_id = participant.supervisor
 
@@ -307,6 +341,65 @@ def export_interviews_per_group(player):
         print(f"Error in export_interviews_per_group: {e}")
         raise e
 
+@simple_safe_operation
+def export_tracking(player):
+    """
+    One row per interview for the monitoring dashboard (app_13).
+    NO personal data: only the pseudonymous participant code (used to match
+    wave 1 and wave 2), place, team and design variables.
+    """
+    participant = player.participant
+    pv = participant.vars
+    data_folder = Path("data_internal/tracking")
+    csv_file_path = data_folder / "interviews.csv"
+    temp_file = csv_file_path.with_suffix('.tmp')
+    data_folder.mkdir(parents=True, exist_ok=True)
+
+    config_name = player.session.config['name']
+    if config_name.endswith('_w1'):
+        wave = 1
+    elif config_name.endswith('_w2'):
+        wave = 2
+    else:
+        wave = ''
+
+    fieldnames = [
+        'participant_label', 'date_interview', 'wave',
+        'city', 'sector', 'survey_origin',
+        'supervisor_id', 'enumerator_id',
+        'sample', 'military_binary', 'contact_source', 'completed'
+    ]
+    new_row = {
+        'participant_label': participant.label or '',
+        'date_interview': datetime.now(C.TZ_COLOMBIA).strftime("%Y-%m-%d %H:%M"),
+        'wave': wave,
+        'city': pv.get('city', ''),
+        'sector': pv.get('sector', ''),
+        'survey_origin': pv.get('survey_origin', ''),
+        'supervisor_id': pv.get('supervisor', ''),
+        'enumerator_id': pv.get('enumerator', ''),
+        'sample': pv.get('sample', ''),
+        'military_binary': pv.get('military_binary', ''),
+        'contact_source': player.field_maybe_none('contact_source') or '',
+        'completed': 0 if pv.get('dropout') else 1,
+    }
+    try:
+        if csv_file_path.exists():
+            shutil.copy2(csv_file_path, temp_file)
+            with open(temp_file, 'a', newline='', encoding='utf-8') as f:
+                csv.DictWriter(f, fieldnames=fieldnames).writerow(new_row)
+        else:
+            with open(temp_file, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(new_row)
+        shutil.move(str(temp_file), str(csv_file_path))
+    except Exception as e:
+        if temp_file.exists():
+            os.remove(temp_file)
+        raise e
+
+
 def clean_phone(raw):
     """Strip spaces, dashes, dots and parentheses, plus an optional +57 / 57 prefix."""
     digits = re.sub(r'[\s\-\.\(\)]', '', raw or '')
@@ -323,6 +416,11 @@ def is_phone_co(raw):
     # mobile (3XXXXXXXXX) or landline (60XXXXXXXX)
     return re.fullmatch(r'(3\d{9}|60\d{8})', clean_phone(raw)) is not None
 
+def id_number_error_message(player, value):
+    v = value.strip()
+    if not v or not all(c in '0123456789' for c in v):
+        return 'Por favor ingrese solo dígitos'
+
 # PAGES
 class Page1_1(Page):
     form_model = 'player'
@@ -337,6 +435,8 @@ class Page1_1(Page):
                 'payment_platform_2',
                 'payment_phone_2',
                 'payment_name',
+                'id_number',
+                'payment_address',
                 'recall_name',
                 'recall_phone_bi',
                 'recall_phone_2',
@@ -351,6 +451,8 @@ class Page1_1(Page):
                 'payment_platform_2',
                 'payment_phone_2',
                 'payment_name',
+                'id_number',
+                'payment_address'
             ]
     @staticmethod
     def vars_for_template(player):
@@ -360,7 +462,10 @@ class Page1_1(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         export_payoffs_headenumerator(player)
-        export_recall(player)
+        if player.session.config['name'] == "session_C4P_SPANISH_w1":
+            export_recall(player)   # recall questions only exist in wave 1
+        else:
+            player.participant.payment_phone = "Anonymous"
         export_interviews_per_group(player)
     @staticmethod
     def is_displayed(player):
@@ -375,7 +480,6 @@ class Page1_1(Page):
                       '10 dígitos que empiezan por 3 (ej. 300 123 4567).')
         MSG_PHONE = ('Por favor, indique un número de teléfono válido: '
                      '10 dígitos (celular que empieza por 3, o fijo que empieza por 60).')
-
         p1 = values.get('payment_platform_1')
         if p1 and p1 != '999':
             if not (values.get('payment_phone_1') or '').strip():
@@ -415,6 +519,10 @@ class Page2(Page):
 class Page3(Page):
     form_model = 'player'
     form_fields = ["contact_source"]
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        export_tracking(player)
 
 page_sequence = [
     Page1_1,

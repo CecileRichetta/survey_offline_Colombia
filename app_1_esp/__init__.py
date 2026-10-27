@@ -1,6 +1,6 @@
 from otree.api import *
 import csv
-import random
+import re
 from datetime import datetime
 
 doc = """
@@ -22,6 +22,10 @@ class C(BaseConstants):
     TEMPLATE_CONSENT_FORM_W2 = '_static/texts_SPANISH/consent_form_w2.html'
     # CONSTANTS
     TOKEN_ENDOWMENT = 4
+    SURVEY_ORIGIN = [
+        (1, "Muestra cartográfica"),
+        (2, "Referidos")
+    ]
 
 class Subsession(BaseSubsession):
     pass
@@ -48,16 +52,21 @@ class Player(BasePlayer):
         label="Ingrese su ciudad donde se esta realizando la encuesta:",
         blank=False
     )
+    survey_origin = models.IntegerField(
+        label="¿La encuesta proviene de la muestra cartográfica o de referidos?",
+        choices=C.SURVEY_ORIGIN,
+        blank=False
+    )
     sector = models.StringField(
         label="Sector:",
         blank=True
     )
     seccion = models.StringField(
-        label="Sección",
+        label="Sección:",
         blank=True
     )
     manzana = models.StringField(
-        label="Manzana",
+        label="Manzana:",
         blank=True
     )
     timestamp = models.StringField()
@@ -83,6 +92,17 @@ def extract_participant_w1(p):
                 participant.treatment_other = int(row['Participant_treatment_other'])
                 break
 
+
+def enumerator_id_error_message(player, value):
+    if not re.fullmatch(r'[0-9]{4}', value.strip()):
+        return 'Por favor ingrese 4 dígitos'
+
+
+def supervisor_id_error_message(player, value):
+    if not re.fullmatch(r'[0-9]{2}', value.strip()):
+        return 'Por favor ingrese 2 dígitos'
+
+
 # PAGES
 class Page0(Page):
     pass
@@ -94,29 +114,30 @@ class Page1(Page):
         'enumerator_name',
         'supervisor_id',
         'city',
+        'survey_origin',
         'sector',
         'seccion',
         'manzana'
     ]
+    @staticmethod
+    def error_message(player, values):
+        if values['survey_origin'] == 1:
+            errors = {}
+            for f in ['sector', 'seccion', 'manzana']:
+                if values[f] in (None, ''):
+                    errors[f] = 'Este campo es obligatorio'
+            if errors:
+                return errors
     @staticmethod
     def before_next_page(player, timeout_happened):
         participant = player.participant
         participant.participation_fee = 30000
         participant.supervisor = player.supervisor_id
         participant.enumerator = player.enumerator_id
-#        if player.session.config['name'] == "session_C4P_SPANISH_w1":
-#            participant.age = player.module_0_age
-#    def error_message(player, values):
-#        if player.session.config['name'] == "session_C4P_SPANISH_w1":
-#            # For actividad_otra (StringField)
-#            if values['module_0_actividad'] == 6:
-#                if not values.get('module_0_actividad_otra') or values['module_0_actividad_otra'].strip() == '':
-#                    return 'Por favor indique la actividad otra.'
-#            if len(values['appleid']) != 6:
-#                return "Apple ID debe tener 6 caracteres."
-#            if not values['appleid'].isdigit():
-#                return "Apple ID debe contener solo números."
-
+        # For the monitoring dashboard (app_13). No personal data here.
+        participant.vars['city'] = player.city.strip()
+        participant.vars['sector'] = (player.field_maybe_none('sector') or '').strip()
+        participant.vars['survey_origin'] = player.survey_origin
 
 
 class Page2(Page):

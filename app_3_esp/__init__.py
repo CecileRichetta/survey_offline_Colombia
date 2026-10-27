@@ -219,21 +219,21 @@ class Player(BasePlayer):
         blank=False
     )
     military_socialization_1 = models.IntegerField(
-        label="3.1.13. Durante su tiempo en el ejército, ¿en qué medida se hacía énfasis en el respeto por la autoridad?",
+        label="3.1.13. Durante su tiempo en el ejército, ¿en qué medida se hacía énfasis en el respeto por la autoridad?  (ver tarjeta 8)",
         #
         choices=C.SCALE_EMPHASIS,
         widget = widgets.RadioSelect,
         blank=False
     )
     military_socialization_2 = models.IntegerField(
-        label="3.1.14. Durante su tiempo en el ejército, ¿cuánta importancia se le daba a comprender las amenazas dentro del país en ese momento?",
+        label="3.1.14. Durante su tiempo en el ejército, ¿cuánta importancia se le daba a comprender las amenazas dentro del país en ese momento?  (ver tarjeta 8)",
         #
         choices=C.SCALE_EMPHASIS,
         widget = widgets.RadioSelect,
         blank=False
     )
     military_socialization_3 = models.IntegerField(
-        label="3.1.15. Durante su servicio militar, ¿hasta qué punto podía contar con la ayuda de otros reclutas?",
+        label="3.1.15. Durante su servicio militar, ¿hasta qué punto podía contar con la ayuda de otros reclutas?  (ver tarjeta 8)",
         # During your service, how much could you count on your peers for support?
         choices=C.SCALE_EMPHASIS,
         widget = widgets.RadioSelect,
@@ -609,7 +609,7 @@ class Page2_2(Page):
     def before_next_page(player, timeout_happened):
         participant = player.participant
         if player.noncombatant_reason == 1 :
-            participant.sample = 1
+            participant.sample = 0
         else:
             participant.sample = 2
 

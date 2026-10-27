@@ -64,7 +64,8 @@ class Player(BasePlayer):
         blank=False
     )
     social_trust_wallet = models.IntegerField(
-        label="8.2. Suponga que pierde su cartera/billetera con sus datos de dirección y alguien que vive en su barrio la encuentra en la calle. ¿Qué tan probable es que se la devuelvan sin que falte nada?",
+        label="8.2. Suponga que pierde su cartera/billetera con sus datos de dirección y alguien que vive en su barrio la encuentra en la calle. "
+              "¿Qué tan probable es que se la devuelvan sin que falte nada? (ver tarjeta 10)",
         #               "someone living in the neighborhood you last lived in, in your home country. How likely is it that it would "
         #               "be returned to you with nothing missing?
         choices= C.WALLET_SCALE,
@@ -72,14 +73,14 @@ class Player(BasePlayer):
         blank=False
     )
     social_trust_2 = models.IntegerField(
-        label="8.3. Por favor dígame, ¿qué tanto confía en: Su familia?",
+        label="8.3. Por favor dígame, ¿qué tanto confía en: Su familia? (ver tarjeta 11)",
         # Please tell me how much you trust: Your family.
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
         blank=False
     )
     social_trust_3 = models.IntegerField(
-        label="8.4. Por favor dígame, ¿qué tanto confía en:  sus vecinos?",
+        label="8.4. Por favor dígame, ¿qué tanto confía en:  sus vecinos? (ver tarjeta 11)",
         # Please tell me how much you trust: Your neighbors.
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
@@ -125,14 +126,14 @@ class Player(BasePlayer):
     )
     # institutional trust
     institutional_trust_1 = models.IntegerField(
-        label="8.11. Por favor, dìgame cuánto confía en la siguiente institución: Presidente",
+        label="8.11. Por favor, dìgame cuánto confía en la siguiente institución: Presidente (ver tarjeta 11)",
         # The president
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
         blank=False
     )
     institutional_trust_2 = models.IntegerField(
-        label="8.12. Por favor, dìgame cuánto confía en la siguiente institución: la administración local"
+        label="8.12. Por favor, dìgame cuánto confía en la siguiente institución: la administración local (ver tarjeta 11)"
               " o Alcaldía local",
         # The parliament
         choices=C.TRUST_SCALE,
@@ -140,28 +141,28 @@ class Player(BasePlayer):
         blank=False
     )
     institutional_trust_7 = models.IntegerField(
-        label="8.13. Por favor, dìgame cuánto confía en la siguiente institución: La policía.",
+        label="8.13. Por favor, dìgame cuánto confía en la siguiente institución: La policía (ver tarjeta 11)",
         # The Police
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
         blank=False
     )
     institutional_trust_8 = models.IntegerField(
-        label="8.14. Por favor, dìgame cuánto confía en el Ejército Colombiano en su papel de proporcionar seguridad y apoyar los esfuerzos de paz.",
+        label="8.14. Por favor, dìgame cuánto confía en el Ejército Colombiano en su papel de proporcionar seguridad y apoyar los esfuerzos de paz (ver tarjeta 11)",
         # The army
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
         blank=False
     )
     institutional_trust_9 = models.IntegerField(
-        label="8.15. Por favor, dígame cuánto confía en que el sistema judicial colombiano, incluidos los tribunales, administran justicia de forma justa.",
+        label="8.15. Por favor, dígame cuánto confía en que el sistema judicial colombiano, incluidos los tribunales, administran justicia de forma justa (ver tarjeta 11)",
         # The courts of law
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,
         blank=False
     )
     institutional_trust_10 = models.IntegerField(
-        label="8.16. Por favor, dígame cuánto confía en los líderes religiosos en Colombia para actuar en el mejor interés de sus comunidades.",
+        label="8.16. Por favor, dígame cuánto confía en los líderes religiosos en Colombia para actuar en el mejor interés de sus comunidades (ver tarjeta 11)",
         # The traditional leaders
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,

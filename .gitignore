@@ -1,0 +1,11 @@
+# Never commit data or local files (this repository is public)
+db.sqlite3
+*.sqlite3
+__pycache__/
+*.pyc
+*.tmp
+.idea/workspace.xml
+# Files created by the survey on the tablets (not in the repository)
+data_internal/tracking/interviews.csv
+data_internal/*/*_old_*.csv
+data_internal/payoffs/paid.csv

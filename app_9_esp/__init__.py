@@ -68,70 +68,70 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     justice_provision_1 = models.IntegerField(
-        label="9.1. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa?: perdón para todos los excombatientes ",
+        label="9.1. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: perdón para todos los excombatientes? (ver tarjeta 11)",
         # 9.1. Regarding the conflict, please tell me how much do you support the following initiative: Amnesty of all previous fighters.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     military_provision_2 = models.IntegerField(
-        label="9.2. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Un cese al fuego?",
+        label="9.2. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Un cese al fuego? (ver tarjeta 11)",
         # 9.2. Regarding the conflict, please tell me how much do you support the following initiative: A ceasefire.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     military_provision_3 = models.IntegerField(
-        label="9.3. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desarme y reintegración de los Excombatientes a la vida civil?",
+        label="9.3. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desarme y reintegración de los Excombatientes a la vida civil? (ver tarjeta 11)",
         # 9.3. Regarding the conflict, please tell me how much do you support the following initiative: Disarmament and reintegration of previous fighters in civilian life.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     military_provision_4 = models.IntegerField(
-        label="9.4. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desmilitarización de las regiones afectadas por el conflicto?",
+        label="9.4. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desmilitarización de las regiones afectadas por el conflicto? (ver tarjeta 11)",
         # 9.4. Regarding the conflict, please tell me how much do you support the following initiative: Demilitarization, of conflict-affected regions
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     political_provision_3 = models.IntegerField(
-        label="9.5. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Diálogos nacionales de paz?",
+        label="9.5. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Diálogos nacionales de paz? (ver tarjeta 11)",
         # 9.5. Regarding the conflict, please tell me how much do you support the following initiative: National peace talks.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     political_provision_4 = models.IntegerField(
-        label="9.6. Por favor, digame cuánto apoya al partido político comunes",
+        label="9.6. Por favor, digame cuánto apoya al partido político comunes (ver tarjeta 11)",
         # 9.7. Please tell me how much do you support the Communes political party
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     territorial_provision_2 = models.IntegerField(
-        label="9.8. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Libertad cultural?",
+        label="9.8. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Libertad cultural? (ver tarjeta 11)",
         # 9.8. Regarding the conflict, please tell me how much do you support the following initiative: Cultural freedom.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     territorial_provision_6 = models.IntegerField(
-        label="9.9. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Autonomía regional/local?",
+        label="9.9. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Autonomía regional/local? (ver tarjeta 11)",
         # 9.9. Regarding the conflict, please tell me how much do you support the following initiative: Local regional autonomy.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     territorial_provision_7 = models.IntegerField(
-        label="9.10. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Distribución del poder a nivel local/regional en las regiones afectadas por el conflicto?",
+        label="9.10. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Distribución del poder a nivel local/regional en las regiones afectadas por el conflicto? (ver tarjeta 11)",
         # 9.10. Regarding the conflict, please tell me how much do you support the following initiative: Local regional power-sharing in conflict-affected regions.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
         blank=False
     )
     territorial_provision_9 = models.IntegerField(
-        label="9.11. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desarrollo económico y social regional?",
+        label="9.11. Con respecto al conflicto, por favor díganos, ¿qué tanto apoya la siguiente iniciativa: Desarrollo económico y social regional? (ver tarjeta 11)",
         # 9.11. Regarding the conflict, please tell me how much do you support the following initiative: Regional economic and social development.
         choices=C.CHOICE_PEACE_SUPPORT,
         widget=widgets.RadioSelect,
@@ -149,7 +149,7 @@ class Player(BasePlayer):
     ngo_amount = models.IntegerField(
         label="9.13. Si es así, ¿cuánto? (en COP)",
  #       widget=widgets.RadioSelect,
-        min=0,
+        min=1000,
         max=30000,
         blank=True
     )
@@ -161,7 +161,7 @@ class Player(BasePlayer):
     )
     hope_check = models.IntegerField(
         label="9.15. ¿Qué tan esperanzado se siente en este momento sobre la posibilidad de un proceso de paz en Colombia "
-              "entre el gobierno y los grupos armados que aún permanecen?",
+              "entre el gobierno y los grupos armados que aún permanecen? (ver tarjeta 12)",
         #
         choices= C.HOPE_SCALE,
         blank=False,

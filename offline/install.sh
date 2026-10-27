@@ -4,7 +4,6 @@
 
 main() {
   source "$(dirname "$0")/config.sh"
-  local T="$C4P_SCRIPTS"
 
   echo "=== 1/6 Storage access ==="
   if [ ! -d "$HOME/storage" ] && command -v termux-setup-storage >/dev/null; then
@@ -73,11 +72,7 @@ main() {
   # Remove settings from the old manual protocol (now in config.sh)
   [ -f "$HOME/.bashrc" ] && \
     sed -i '/OTREE_\|ENUMERATOR_ID/d' "$HOME/.bashrc"
-  for s in run upload update; do
-    printf '#!/bin/bash\nexec bash "%s/%s.sh" "$@"\n' "$T" "$s" \
-      > "$HOME/$s.sh"
-    chmod +x "$HOME/$s.sh"
-  done
+  c4p_make_shortcuts
 
   echo
   echo "Installation finished."
@@ -86,6 +81,7 @@ main() {
   echo "  ./run.sh     start oTree (session 1)"
   echo "  ./upload.sh  send the data (session 2)"
   echo "  ./update.sh  get the latest survey version"
+  echo "  ./reset.sh   new empty database (only when Geneva asks)"
 }
 
 main "$@"

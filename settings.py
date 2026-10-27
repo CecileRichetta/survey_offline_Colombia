@@ -1,11 +1,14 @@
 from os import environ
 
+# Offline version (tablets). The database is set by offline/run.sh,
+# and the admin password / secret key come from offline/config.sh and the tablet.
+
 ROOMS = [
     dict(
         name="C4PTHP_COL",
         display_name="C4PTHP_COL",
         participant_label_file="_rooms/participant_label_colombia.txt",  # change when final study to _inc
-        use_secure_urls=False
+        use_secure_urls=False  # safe here: oTree only listens on the tablet itself (127.0.0.1)
     )
 #    dict(
 #        name="C4PTHP_COL_TRAINING_1",
@@ -19,10 +22,6 @@ ROOMS = [
 #        participant_label_file="_rooms/participant_label_colombia.txt",  # change when final study to _inc
 #        use_secure_urls=False
 #    ),
-#    dict(
-#        name="pilot_COL_HEAD",
-#        display_name="C4P_pilot_COL_HEAD"
-#    )
 ]
 
 SESSION_CONFIGS = [
@@ -42,13 +41,6 @@ SESSION_CONFIGS = [
         ],
         num_demo_participants=6,
     ),
-#    dict(
-#        name='session_C4P_pilot_COL_headenumerator',
-#        app_sequence=[
-#            'app_13'
-#        ],
-#        num_demo_participants=1,
-#    ),
 ]
 
 SESSION_CONFIG_DEFAULTS = dict(
@@ -64,7 +56,7 @@ PARTICIPANT_FIELDS = [
     'other_UG_decision', 'other_PG_decision',
     'payoff_UG', 'payoff_PG',
     'total_payoff_token', 'payoff_games', 'total_compensation',
-    'payment_platform', 'payment_phone',
+    'payment_platform', 'payment_phone', 'id_number', 'payment_address',
     'recall_phone',
 ]
 
@@ -79,4 +71,5 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 AUTH_LEVEL = environ.get('OTREE_AUTH_LEVEL')
 
 DEMO_PAGE_INTRO_HTML = """ """
-SECRET_KEY = '9805055233605'
+# Random key created on each tablet by offline/run.sh (this repository is public)
+SECRET_KEY = environ.get('OTREE_SECRET_KEY', 'dev-only-not-secret')

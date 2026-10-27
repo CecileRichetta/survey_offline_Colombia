@@ -62,7 +62,13 @@ Termux has two sessions (swipe from the left edge to see them):
 **End of each day with offline interviews:** check oTree is running,
 then in session [2] type `./upload.sh`. It must end with
 `Upload complete!`. If it says `UPLOAD FAILED`, try again later with
-internet: nothing is lost.
+internet: nothing is lost (the files wait on the tablet and are sent
+with the next upload).
+
+After `Upload complete!`, the personal information (names, cédulas,
+addresses, phone numbers, e-mails) is **deleted from the tablet**:
+SwitchDrive has a checked copy. Upload every day, so that a lost or
+stolen tablet holds as little personal information as possible.
 
 ## D. Updating the survey (when Geneva asks)
 
@@ -74,7 +80,41 @@ Then stop oTree in session [1] (**Ctrl+C**) and start it again with
 `./run.sh`. If the update says `UPDATE FAILED`, do not delete anything:
 send a screenshot to the Geneva team.
 
-## E. Tablets installed with the old protocol (once)
+If the update (or `./run.sh`) says **"needs a new database"**, the new
+version has new questions. With internet, type:
+
+```
+./reset.sh
+```
+
+and type `RESET` when asked. It stops oTree, sends **all** the data of
+the tablet to SwitchDrive, checks it, and only then empties the
+database. It must end with `Reset complete`. If it says
+`RESET CANCELLED`, nothing was deleted: try again with internet.
+Then start oTree (`./run.sh` in session [1]) and create the session
+again (part B).
+
+## E. Update of October 2026 (new payment questions), all tablets, once
+
+With internet, oTree running in session [1], in session [2]:
+
+```
+./upload.sh
+```
+
+```
+./update.sh
+```
+
+```
+bash ~/otree-experiments/survey_offline_Colombia/offline/reset.sh
+```
+
+(the short `./reset.sh` only exists after this first time). Type
+`RESET` when asked. Then `./run.sh` in session [1] and create the
+session again (part B).
+
+## F. Tablets installed with the old protocol (once)
 
 ```
 cd ~/otree-experiments/survey_offline_Colombia
@@ -95,8 +135,21 @@ cd ~ && ./update.sh
 ## What goes where
 
 All data goes to SwitchDrive in
-`C4P_Data/<enumerator ID>/<date>/` (Geneva team only):
-`otree_data_<date>.csv` (anonymised oTree export), `payoffs_<date>.csv`
-and `recall_<date>.csv` (personal information), plus the tracking and
-wave 2 files. A copy stays on the tablet in
-`Downloads/otree_upload_<date>`.
+`C4P_Data/<enumerator ID>/<date_time>/` (Geneva team only), one folder
+per upload:
+
+- `otree_data_<date_time>.csv`: anonymised oTree export (all interviews
+  of the tablet so far).
+- `payoffs_<date_time>.csv` and `recall_<date_time>.csv`: personal
+  information, **only the interviews since the previous upload** (they
+  are deleted from the tablet after each upload). Combine the files of
+  all uploads; drop duplicate rows (same participant and date) that a
+  failed upload can create.
+- tracking (`interviews`, `interviews_per_group`, `payment_ngo`) and
+  wave 2 files.
+- `<date_time>_before_reset/`: full copy made by `./reset.sh`
+  (database file `db_<date_time>.sqlite3` and all CSV files).
+
+Nothing is kept in the tablet's Downloads folder any more (other
+Android apps can read it). Files waiting for upload are in the
+Termux-private folder `~/otree_uploads`.

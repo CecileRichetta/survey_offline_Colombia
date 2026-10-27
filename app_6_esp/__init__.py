@@ -106,7 +106,7 @@ class Player(BasePlayer):
     )
     # RISK AVERSION CHECK
     risk_aversion = models.IntegerField(
-        label="6.6. ¿Qué tan de acuerdo esta con la siguiente afirmación?: En términos generales, soy una persona completamente preparada para asumir riesgos",
+        label="6.6. ¿Qué tan de acuerdo esta con la siguiente afirmación?: En términos generales, soy una persona completamente preparada para asumir riesgos (ver tarjeta 9)",
         # How much do you agree with the following statement: Generally speaking, I am person fully prepared to take risks.
         choices=C.RISK_AVERSION,
         widget=widgets.RadioSelect,

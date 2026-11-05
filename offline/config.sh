@@ -28,7 +28,9 @@ C4P_WAVE_FILE="$C4P_SCRIPTS/OLA"
 # Wave of the session that exists on this tablet
 C4P_SESSION_WAVE_FILE="$HOME/.c4p_ola_sesion"
 
-# Where the enumerator code of this tablet is stored (set by instalar.sh)
+# Where the enumerator code of this tablet is stored. It is asked the
+# first time the tablet is used (option 1 or 2 of the menu), not at the
+# installation, because tablets are installed before being assigned.
 C4P_ID_FILE="$HOME/.c4p_enumerator"
 # Date of the last complete upload (shown in the menu)
 C4P_LAST_UPLOAD_FILE="$HOME/.c4p_ultimo_envio"
@@ -94,6 +96,29 @@ c4p_make_shortcuts() {
   for rc in "$HOME/.bashrc" "$HOME/.bash_profile"; do
     grep -qsF 'C4P_MENU=1' "$rc" || echo "$line" >> "$rc"
   done
+}
+
+# ---------- Enumerator code ----------
+
+# Asks for the enumerator code if this tablet does not have one yet.
+# Returns 1 if no code could be read.
+c4p_ask_enumerator() {
+  [ -s "$C4P_ID_FILE" ] && return 0
+  local ENUM OK
+  echo "Esta tablet todavía no tiene código de encuestador."
+  while true; do
+    read -r -p "Escriba su código de encuestador (4 dígitos): " ENUM || return 1
+    if [[ ! "$ENUM" =~ ^[0-9]{4}$ ]]; then
+      echo "Deben ser exactamente 4 dígitos."
+      continue
+    fi
+    read -r -p "Usted escribió $ENUM. ¿Es correcto? Escriba s (sí) o n (no): " OK || return 1
+    if [ "$OK" = "s" ] || [ "$OK" = "S" ]; then
+      break
+    fi
+  done
+  echo "$ENUM" > "$C4P_ID_FILE"
+  echo
 }
 
 # ---------- oTree ----------

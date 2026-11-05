@@ -16,12 +16,18 @@ git clone https://github.com/CecileRichetta/survey_offline_Colombia &&
 bash survey_offline_Colombia/offline/instalar.sh
 ```
 
-3. When asked, type the **4-digit enumerator code**, then paste the
-   **SwitchDrive link password** given by the Geneva team (nothing is shown
-   while pasting, this is normal).
+3. When asked, paste the **SwitchDrive link password** given by the Geneva team
+   (nothing is shown while pasting, this is normal).
 4. Android settings → Apps → Termux → Battery → **Unrestricted**.
 
 The installation can be run again safely: steps already done are skipped.
+
+**Enumerator code:** it is not asked at installation, so tablets can be installed
+before they are assigned. The enumerator types it the first time they use option
+1 or 2 of the menu. After that the menu shows it. If you tried option 1 or 2 while
+preparing a tablet, or a tablet changes hands, clear the code: type `0` in the menu, then
+`rm ~/.c4p_enumerator`. Send the data first when a tablet changes hands, because the next upload
+goes to the new code's folder.
 
 ## Daily use: the menu
 

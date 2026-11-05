@@ -35,6 +35,7 @@ main() {
     echo "  3  Actualizar"
     echo "  4  Ayuda"
     echo
+    echo "Código de encuestador: $(cat "$C4P_ID_FILE" 2>/dev/null || echo "todavía sin registrar")"
     LAST=$(cat "$C4P_LAST_UPLOAD_FILE" 2>/dev/null)
     echo "Último envío de datos: ${LAST:-ninguno todavía}"
     echo

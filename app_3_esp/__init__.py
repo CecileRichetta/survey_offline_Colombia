@@ -166,7 +166,7 @@ class Player(BasePlayer):
         # 3.1.5. In which year did you start to be in that subregion?
         choices=[
             [999, "No responde (no leer)"],
-            *[[y, str(y)] for y in range(1989,1996)]
+            *[[y, str(y)] for y in range(1989,1998)]
         ],
         blank=False
     )
@@ -201,7 +201,7 @@ class Player(BasePlayer):
         # In which YEAR were you deployed in this province?
         choices=[
             [999, "No responde (no leer)"],
-            *[[y, str(y)] for y in range(1989,1996)]
+            *[[y, str(y)] for y in range(1989,1998)]
         ],
         blank=False
     )
@@ -257,7 +257,7 @@ class Player(BasePlayer):
         # In which period did you reside in this province?
         choices=[
             [999, "Prefer not to answer"],
-            *[[y, str(y)] for y in range(1970,1996)]
+            *[[y, str(y)] for y in range(1970,1998)]
         ],
         blank=False
     )
@@ -298,7 +298,7 @@ class Player(BasePlayer):
         # In which period did you reside in this province?
         choices=[
             [999, "Prefer not to answer"],
-            *[[y, str(y)] for y in range(1970,1996)]
+            *[[y, str(y)] for y in range(1970,1998)]
         ],
         blank=False
     )

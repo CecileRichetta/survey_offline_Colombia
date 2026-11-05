@@ -3,6 +3,12 @@
 # opens the page where the enumerator enters the ID.
 source "$(dirname "$(readlink -f "$0")")/config.sh"
 
+# First use of this tablet: ask for the enumerator code.
+# ("Actualizar" also uses this script, and must not ask for it.)
+if [ "$1" != "--sin-navegador" ]; then
+  c4p_ask_enumerator || exit 1
+fi
+
 c4p_start_otree
 case $? in
   0) ;;

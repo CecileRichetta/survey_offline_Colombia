@@ -4,6 +4,8 @@
 # information (payoffs, recall) are deleted from the tablet.
 source "$(dirname "$(readlink -f "$0")")/config.sh"
 
+c4p_ask_enumerator || exit 1
+
 STAMP=$(date +%Y-%m-%d_%H%M%S)
 ENUM=$(cat "$C4P_ID_FILE" 2>/dev/null)
 OUTDIR="$C4P_UPLOAD_ROOT/$STAMP"

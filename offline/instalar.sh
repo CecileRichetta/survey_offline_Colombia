@@ -1,40 +1,23 @@
 #!/bin/bash
 # One-time installation of the offline C4P survey on a tablet.
 # Safe to run again: steps already done are skipped.
+# The enumerator code is not asked here: see c4p_ask_enumerator in config.sh.
 
 main() {
   source "$(dirname "$(readlink -f "$0")")/config.sh"
 
-  echo "=== 1/4 Programas (5-10 minutos) ==="
+  echo "=== 1/3 Programas (5-10 minutos) ==="
   # 'yes ""' answers every question with Enter (= default)
   yes "" | pkg upgrade -y
   pkg install -y python build-essential libffi openssl rust git rclone
 
-  echo "=== 2/4 oTree (puede tardar 15 minutos o más) ==="
+  echo "=== 2/3 oTree (puede tardar 15 minutos o más) ==="
   [ -d "$C4P_VENV" ] || python -m venv "$C4P_VENV"
   source "$C4P_VENV/bin/activate"
   python -c "import otree" 2>/dev/null || pip install "otree==6.0.15" --no-cache-dir
   deactivate
 
-  echo "=== 3/4 Código de encuestador ==="
-  local ENUM OK
-  ENUM=$(cat "$C4P_ID_FILE" 2>/dev/null)
-  if [ -n "$ENUM" ]; then
-    echo "Esta tablet ya tiene el código: $ENUM"
-  else
-    while true; do
-      read -r -p "Escriba su código de encuestador (4 dígitos): " ENUM
-      if [[ ! "$ENUM" =~ ^[0-9]{4}$ ]]; then
-        echo "Deben ser exactamente 4 dígitos."
-        continue
-      fi
-      read -r -p "Usted escribió $ENUM. ¿Es correcto? Escriba s (sí) o n (no): " OK
-      [ "$OK" = "s" ] || [ "$OK" = "S" ] && break
-    done
-    echo "$ENUM" > "$C4P_ID_FILE"
-  fi
-
-  echo "=== 4/4 SwitchDrive ==="
+  echo "=== 3/3 SwitchDrive ==="
   # Remove a remote from the old protocol (personal account access)
   if rclone listremotes | grep -qx "$C4P_REMOTE:" && \
      ! rclone config show "$C4P_REMOTE" | grep -q "$SWD_SHARE_TOKEN"; then

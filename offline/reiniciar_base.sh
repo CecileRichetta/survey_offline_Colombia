@@ -11,11 +11,8 @@ main() {
 
   local ENUM STAMP SAVE ANSWER d
   ENUM=$(cat "$C4P_ID_FILE" 2>/dev/null)
-  if [ -z "$ENUM" ]; then
-    echo "ERROR: esta tablet no tiene código de encuestador."
-    echo "Tome una foto de esta pantalla y envíela a su supervisor."
-    exit 1
-  fi
+  # Tablet not assigned yet: do not ask for a code, keep the copy apart
+  [ -n "$ENUM" ] || ENUM=sin_codigo
 
   echo "Se enviarán TODOS los datos de esta tablet a SwitchDrive y"
   echo "después se creará una base de datos vacía."

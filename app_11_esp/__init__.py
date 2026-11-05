@@ -22,6 +22,7 @@ class C(BaseConstants):
     NUM_ROUNDS = 1
     TEMPLATE_DEBRIEF_FORM = '_static/texts_SPANISH/debrief_form.html'
     TZ_COLOMBIA = timezone(timedelta(hours=-5))
+    PARTICIPATION_FEE = 30000
     #
     PLATFORM_PAYMENT_1 = [
         ("Daviplata", "Sí, Daviplata"),
@@ -39,6 +40,7 @@ class C(BaseConstants):
         (4, "Institución (fuerza pública, educativa, gremio)")
     ]
 
+# friend, family, colleague, former conscript with me (?)
 
 class Subsession(BaseSubsession):
     pass
@@ -108,8 +110,23 @@ class Player(BasePlayer):
         label="11.12 Por favor, proporcione una dirección geográfica para el recontacto a la fase II",
         blank=False
     )
+    recall_other_phone_bi = models.IntegerField(
+        label="11.13 ¿Desea darnos el número de teléfono de otra persona, por si el suyo ya no está activo cuando volvamos a contactarle?",
+        # Do you wish to give someone else's number, in case yours is no longer active when we recontact you?
+        choices=[
+            (1, "Sí"),
+            (0, "No")
+        ],
+        widget=widgets.RadioSelect,
+        blank=False
+    )
+    recall_other_phone = models.StringField(
+        label="11.14 Por favor, indique el número de teléfono de esa otra persona.",
+        # Please enter the other person's phone number.
+        blank=True
+    )
     contact_source = models.IntegerField(
-        label="11.13 Solo para el encuestador: ¿Cómo se contactó a la persona encuestada?",
+        label="11.15 Solo para el encuestador: ¿Cómo se contactó a la persona encuestada?",
         choices=C.CONTACT_SOURCE,
         widget=widgets.RadioSelect,
         blank=False
@@ -173,7 +190,6 @@ def export_payoffs_headenumerator(player):
         'id_number', 'payment_address',
         'participation_fee', 'payoff_games', 'total_compensation'
     ]
-    set_aside_if_old_header(csv_file_path, fieldnames)
     new_row = {
         'participant_label': participant.label,
         'date_interview': timestamp,
@@ -186,6 +202,8 @@ def export_payoffs_headenumerator(player):
         'payoff_games': participant.payoff_games,
         'total_compensation': participant.total_compensation
     }
+
+    set_aside_if_old_header(csv_file_path, fieldnames)
 
     try:
         if csv_file_path.exists():
@@ -222,6 +240,30 @@ def export_payoffs_headenumerator(player):
         print(f"Erreur dans export_payoffs_headenumerator: {e}")
         raise e
 
+def add_missing_csv_columns(csv_file_path, fieldnames):
+    """
+    If an existing CSV lacks some columns (e.g. recall.csv created before a new
+    question was added), add them with empty values. All existing rows are kept.
+    """
+    with open(csv_file_path, 'r', newline='') as f:
+        reader = csv.DictReader(f)
+        existing = reader.fieldnames or []
+        rows = list(reader)
+    missing = [name for name in fieldnames if name not in existing]
+    if not missing:
+        return
+    temp_file = csv_file_path.with_suffix('.upgrade.tmp')
+    try:
+        with open(temp_file, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=existing + missing)
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(temp_file, csv_file_path)
+    finally:
+        if temp_file.exists():
+            os.remove(temp_file)
+
+
 @simple_safe_operation
 def export_recall(player):
     participant = player.participant
@@ -244,11 +286,18 @@ def export_recall(player):
             'participant_name': player.recall_name,
             'participant_phone': participant.recall_phone,
             'participant_email': player.recall_email,
-            'participant_address': player.recall_address
+            'participant_address': player.recall_address,
+            'participant_other_phone': (
+                clean_phone(player.field_maybe_none('recall_other_phone'))
+                if player.recall_other_phone_bi == 1 else ''
+            )
         }
 
         # PROTECTION: Écrire dans temp d'abord
         if csv_file_path.exists():
+            # Add any new column to a file created by an earlier version
+            add_missing_csv_columns(csv_file_path, list(new_data.keys()))
+
             # Copier l'original vers temp
             shutil.copy2(csv_file_path, temp_file)
 
@@ -278,6 +327,7 @@ def export_recall(player):
         player.recall_name = "Anonymous"
         player.recall_email = "Anonymous"
         player.recall_address = "Anonymous"
+        player.recall_other_phone = "Anonymous"
 
     except Exception as e:
         # Nettoyer le fichier temp en cas d'erreur
@@ -400,6 +450,10 @@ def export_tracking(player):
         raise e
 
 
+def format_cop(amount):
+    """30000 -> 30.000 COP"""
+    return f"{int(amount):,}".replace(',', '.') + " COP"
+
 def clean_phone(raw):
     """Strip spaces, dashes, dots and parentheses, plus an optional +57 / 57 prefix."""
     digits = re.sub(r'[\s\-\.\(\)]', '', raw or '')
@@ -442,6 +496,8 @@ class Page1_1(Page):
                 'recall_phone_2',
                 'recall_email',
                 'recall_address',
+                'recall_other_phone_bi',
+                'recall_other_phone',
             ]
         # Wave 2: payment fields only
         elif participant.dropout is False and player.session.config['name'] == "session_C4P_SPANISH_w2":
@@ -498,6 +554,11 @@ class Page1_1(Page):
                 return 'Por favor, indique un número de teléfono.'
             if not is_phone_co(values['recall_phone_2']):
                 return MSG_PHONE
+        if values.get('recall_other_phone_bi') == 1:
+            if not (values.get('recall_other_phone') or '').strip():
+                return 'Por favor, indique el número de teléfono de la otra persona.'
+            if not is_phone_co(values['recall_other_phone']):
+                return MSG_PHONE
 
 
 class Page1_2(Page):
@@ -521,12 +582,30 @@ class Page3(Page):
     form_fields = ["contact_source"]
 
     @staticmethod
+    def vars_for_template(player):
+        # Payment summary. Nothing to show if the person did not take part.
+        pv = player.participant.vars
+        if pv.get('dropout') or 'total_compensation' not in pv:
+            return dict(show_payment=False)
+        fee = pv['participation_fee']
+        donation = C.PARTICIPATION_FEE - fee
+        return dict(
+            show_payment=True,
+            games_cop=format_cop(pv['payoff_games']),
+            fee_cop=format_cop(fee),
+            full_fee_cop=format_cop(C.PARTICIPATION_FEE),
+            donation_cop=format_cop(donation),
+            has_donation=donation > 0,
+            total_cop=format_cop(pv['total_compensation']),
+        )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         export_tracking(player)
 
 page_sequence = [
     Page1_1,
-    Page1_2,
+    # Page1_2 removed: the earnings now appear in the summary on Page3
     Page2,
     Page3
 ]

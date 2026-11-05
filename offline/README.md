@@ -1,155 +1,81 @@
 # C4P offline survey on an Android tablet
 
-Copy each grey box with its **copy button** (top-right of the box),
-paste it into Termux and press **Enter**. Do not retype the commands.
+Enumerators follow the Spanish guide (PDF). They only use the menu that
+opens with Termux and type a number. This page is for the support team.
 
-## A. Installation (support team, once per tablet, with internet)
+## Installation (once per tablet, with internet, about 30 minutes)
 
 1. Install **Termux from F-Droid** (not the Play Store):
    https://f-droid.org/en/packages/com.termux/
-   (allow "Install unknown apps" for your browser if Android asks).
-2. Open Termux and run, one box at a time:
+2. Open Termux, paste these four lines together and press **Enter**:
 
 ```
-pkg update -y && pkg install -y git
+yes "" | pkg update -y; pkg install -y git &&
+mkdir -p ~/otree-experiments && cd ~/otree-experiments &&
+git clone https://github.com/CecileRichetta/survey_offline_Colombia &&
+bash survey_offline_Colombia/offline/instalar.sh
 ```
 
-```
-mkdir -p ~/otree-experiments && cd ~/otree-experiments
-```
+3. When asked, type the **4-digit enumerator code**, then paste the
+   **SwitchDrive link password** given by the Geneva team (nothing is shown
+   while pasting, this is normal).
+4. Android settings → Apps → Termux → Battery → **Unrestricted**.
 
-```
-git clone https://github.com/CecileRichetta/survey_offline_Colombia
-```
+The installation can be run again safely: steps already done are skipped.
 
-```
-bash survey_offline_Colombia/offline/install.sh
-```
+## Daily use: the menu
 
-During the installation:
+| Number | Script | What it does |
+|---|---|---|
+| 1 Iniciar encuesta | `iniciar.sh` | Starts oTree in the background if needed, creates the session if needed, opens the ID page in the browser. |
+| 2 Enviar datos | `enviar_datos.sh` | Exports and sends the data to SwitchDrive, checks it, then deletes personal data from the tablet. Needs internet. |
+| 3 Actualizar | `actualizar.sh` | Gets the latest survey version and restarts oTree. If a new database is needed, it runs `reiniciar_base.sh`. Needs internet. |
+| 4 Ayuda | | Short help in Spanish. |
+| 0 (not shown) | | Leaves the menu, for support. `./menu.sh` opens it again. |
 
-- If a question appears during the package update, press **Enter**.
-- Tap **Allow** when Android asks for storage access.
-- Type the **enumerator ID** of this tablet (e.g. `enumerator_01`).
-- Paste the **SwitchDrive link password** given by the Geneva team
-  (nothing is shown while you paste, this is normal).
+`config.sh` holds the shared settings and is not launched by hand.
 
-The last lines should say `SwitchDrive connection OK` and
-`Installation finished`.
+Nobody needs the oTree admin page on a tablet any more: the session is
+created automatically (300 participants) through the local REST API.
 
-3. Android settings → Apps → Termux → Battery → **Unrestricted**.
+## For Geneva: changing things on all tablets
 
-## B. Open the session (support team)
+Commit and push to GitHub, then ask the teams to use **3 Actualizar**.
 
-Start oTree (see C), then open `http://localhost:8000/` in the browser
-and log in with user `admin`, password `C4P_colombia`.
-Go to **Rooms → C4PTHP_COL**, choose wave 1 or wave 2, set the number of
-participants (expected interviews + 10%) and click **Create**.
-This is done once: the session survives restarts.
+- **Wave:** write `1` or `2` in `offline/OLA`. The tablet creates a new session
+  of that wave at the next start. Earlier interviews stay in the database.
+- **New or changed questions in the database:** add 1 to `offline/DB_VERSION`.
+  "Actualizar" then asks for `SI`, sends and checks everything including the
+  database file, and only then creates the empty database.
+- **Never modify the tablet data files tracked in git** (list in `config.sh`):
+  `git pull` would fail on the tablets. New files written by tablets must be
+  listed in `.gitignore`.
 
-## C. Daily use
+## Names are not shown offline
 
-Termux has two sessions (swipe from the left edge to see them):
+The wave 2 name check exists only in the online version (`pid_check.csv`).
+Tablets show the ID only, and never hold a list of names for wave 2: a lost
+tablet must not expose participants. Do not copy `pid_check.csv` to a tablet.
 
-| Session | Command            | What it does |
-|---|--------------------|---|
-| [1] | `cd ~ && ./run.sh` | Starts oTree. Leave it open. |
-| [2] (NEW SESSION) | `./upload.sh`      | Sends the data to Geneva (needs internet). |
-
-**Is oTree running?** Open an offline link. If it fails, type
-`./run.sh` in session [1].
-
-**End of each day with offline interviews:** check oTree is running,
-then in session [2] type `./upload.sh`. It must end with
-`Upload complete!`. If it says `UPLOAD FAILED`, try again later with
-internet: nothing is lost (the files wait on the tablet and are sent
-with the next upload).
-
-After `Upload complete!`, the personal information (names, cédulas,
-addresses, phone numbers, e-mails) is **deleted from the tablet**:
-SwitchDrive has a checked copy. Upload every day, so that a lost or
-stolen tablet holds as little personal information as possible.
-
-## D. Updating the survey (when Geneva asks)
-
-```
-./update.sh
-```
-
-Then stop oTree in session [1] (**Ctrl+C**) and start it again with
-`./run.sh`. If the update says `UPDATE FAILED`, do not delete anything:
-send a screenshot to the Geneva team.
-
-If the update (or `./run.sh`) says **"needs a new database"**, the new
-version has new questions. With internet, type:
-
-```
-./reset.sh
-```
-
-and type `RESET` when asked. It stops oTree, sends **all** the data of
-the tablet to SwitchDrive, checks it, and only then empties the
-database. It must end with `Reset complete`. If it says
-`RESET CANCELLED`, nothing was deleted: try again with internet.
-Then start oTree (`./run.sh` in session [1]) and create the session
-again (part B).
-
-## E. Update of October 2026 (new payment questions), all tablets, once
-
-With internet, oTree running in session [1], in session [2]:
-
-```
-./upload.sh
-```
-
-```
-./update.sh
-```
-
-```
-bash ~/otree-experiments/survey_offline_Colombia/offline/reset.sh
-```
-
-(the short `./reset.sh` only exists after this first time). Type
-`RESET` when asked. Then `./run.sh` in session [1] and create the
-session again (part B).
-
-## F. Tablets installed with the old protocol (once)
-
-```
-cd ~/otree-experiments/survey_offline_Colombia
-```
-
-```
-git fetch && git checkout origin/master -- offline
-```
-
-```
-bash offline/install.sh
-```
-
-```
-cd ~ && ./update.sh
-```
+If someone interviewed on a tablet in wave 1 will be interviewed online in
+wave 2, add their ID and name to the server's `pid_check.csv` from the
+`recall` files on SwitchDrive. Otherwise the online pop-up will not find them.
 
 ## What goes where
 
 All data goes to SwitchDrive in
-`C4P_Data/<enumerator ID>/<date_time>/` (Geneva team only), one folder
-per upload:
+`C4P_Data/<enumerator code>/<date_time>/` (Geneva team only), one folder per
+upload:
 
-- `otree_data_<date_time>.csv`: anonymised oTree export (all interviews
-  of the tablet so far).
-- `payoffs_<date_time>.csv` and `recall_<date_time>.csv`: personal
-  information, **only the interviews since the previous upload** (they
-  are deleted from the tablet after each upload). Combine the files of
-  all uploads; drop duplicate rows (same participant and date) that a
-  failed upload can create.
-- tracking (`interviews`, `interviews_per_group`, `payment_ngo`) and
-  wave 2 files.
-- `<date_time>_before_reset/`: full copy made by `./reset.sh`
+- `otree_data_<date_time>.csv`: anonymised oTree export (all interviews of the
+  tablet so far).
+- `payoffs_<date_time>.csv` and `recall_<date_time>.csv`: personal information,
+  **only the interviews since the previous upload** (they are deleted from the
+  tablet after each upload). Combine the files of all uploads; drop duplicate
+  rows (same participant and date) that a failed upload can create.
+- tracking (`interviews`, `interviews_per_group`, `payment_ngo`) and wave 2 files.
+- `<date_time>_before_reset/`: full copy made before a new database
   (database file `db_<date_time>.sqlite3` and all CSV files).
 
-Nothing is kept in the tablet's Downloads folder any more (other
-Android apps can read it). Files waiting for upload are in the
-Termux-private folder `~/otree_uploads`.
+Files waiting for upload are in the Termux-private folder `~/otree_uploads`.
+oTree messages for troubleshooting are in `~/otree.log`.

@@ -1,6 +1,6 @@
 from os import environ
 
-# Offline version (tablets). The database is set by offline/run.sh,
+# Offline version (tablets). The database is set by offline/iniciar.sh,
 # and the admin password / secret key come from offline/config.sh and the tablet.
 
 ROOMS = [
@@ -71,5 +71,5 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 AUTH_LEVEL = environ.get('OTREE_AUTH_LEVEL')
 
 DEMO_PAGE_INTRO_HTML = """ """
-# Random key created on each tablet by offline/run.sh (this repository is public)
+# Random key created on each tablet by offline/iniciar.sh (this repository is public)
 SECRET_KEY = environ.get('OTREE_SECRET_KEY', 'dev-only-not-secret')

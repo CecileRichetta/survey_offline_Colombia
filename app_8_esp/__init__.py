@@ -126,7 +126,7 @@ class Player(BasePlayer):
     )
     # institutional trust
     institutional_trust_1 = models.IntegerField(
-        label="8.11. Por favor, dìgame cuánto confía en la siguiente institución: Presidente (ver tarjeta 11)",
+        label="8.11. Por favor, dìgame cuánto confía en la siguiente institución: Presidencia (ver tarjeta 11)",
         # The president
         choices=C.TRUST_SCALE,
         widget=widgets.RadioSelect,

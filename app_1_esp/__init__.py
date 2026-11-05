@@ -40,12 +40,8 @@ class Player(BasePlayer):
         label="Ingrese su identificador de encuestador", # enter your enumerator identifier
         blank=False
     )
-    enumerator_name = models.StringField(
-        label="Ingrese su nombre de encuestador",
-        blank=False
-    )
     supervisor_id = models.StringField(
-        label="Ingrese su nombre de supervisor",
+        label="Ingrese su código de supervisor",
         blank=False
     )
     city = models.StringField(
@@ -105,13 +101,19 @@ def supervisor_id_error_message(player, value):
 
 # PAGES
 class Page0(Page):
-    pass
+    @staticmethod
+    def js_vars(player):
+        # Used by the ID confirmation pop-up on this page
+        room = player.session.get_room()
+        return dict(
+            participant_id=player.participant.label,
+            room_url='/room/' + room.name if room else None
+        )
 
 class Page1(Page):
     form_model = 'player'
     form_fields = [
         'enumerator_id',
-        'enumerator_name',
         'supervisor_id',
         'city',
         'survey_origin',

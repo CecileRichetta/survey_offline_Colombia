@@ -19,10 +19,12 @@ class C(BaseConstants):
         (4, "Secundaria completa"),  #
         (5, "Educación técnica incompleta"),  #
         (6, "Educación técnica completa"),  #
-        (7, "Educación universitaria incompleta"),  #
-        (8, "Educación universitaria completa"),  #
-        (9, "Máster o doctorado (posgrado)"),  #
-        (10, "Otro"),
+        (7, "Educación tecnología incompleta"),
+        (8, "Educación tecnología completa"),
+        (9, "Educación universitaria incompleta"),  #
+        (10, "Educación universitaria completa"),  #
+        (11, "Máster o doctorado (posgrado)"),  #
+        (12, "Otro"),
         (998, "No sabe (no leer)"),  # Don't know
         (999, "No responde (no leer)")  # Prefer not to say
     ]

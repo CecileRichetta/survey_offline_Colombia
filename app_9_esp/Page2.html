@@ -1,12 +1,3 @@
-{{ block scripts }}
-    <html lang="en">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-{{ endblock }}
-
 {{ block style }}
     <style>
         .progress-text {
@@ -133,4 +124,119 @@
 
 {{ block options }}
     </html>
+{{ endblock }}
+
+{{ block styles }}
+    <style>
+        .confirm-overlay {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .confirm-box {
+            background: white;
+            max-width: 500px;
+            margin: 16px auto;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .confirm-value {
+            display: block;
+            margin: 12px 0;
+            font-size: 26px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+        .confirm-buttons { display: flex; gap: 12px; margin-top: 1.25rem; }
+        .confirm-buttons button {
+            flex: 1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .confirm-yes { background-color: #0d6efd; }
+        .confirm-no { background-color: #6c757d; }
+    </style>
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Show a pop-up with a question and a value; calls onYes or onNo
+    function showConfirmation(question, value, noText, onYes, onNo) {
+        var overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        var box = document.createElement('div');
+        box.className = 'confirm-box';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-modal', 'true');
+        var text = document.createElement('div');
+        text.textContent = question;
+        var shown = document.createElement('span');
+        shown.className = 'confirm-value';
+        shown.textContent = value;
+        var buttons = document.createElement('div');
+        buttons.className = 'confirm-buttons';
+        var no = document.createElement('button');
+        no.type = 'button';
+        no.className = 'confirm-no';
+        no.textContent = noText;
+        var yes = document.createElement('button');
+        yes.type = 'button';
+        yes.className = 'confirm-yes';
+        yes.textContent = 'Sí, continuar';
+        buttons.appendChild(no);
+        buttons.appendChild(yes);
+        box.appendChild(text);
+        box.appendChild(shown);
+        box.appendChild(buttons);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        no.addEventListener('click', function () {
+            document.body.removeChild(overlay);
+            onNo();
+        });
+        yes.addEventListener('click', function () {
+            document.body.removeChild(overlay);
+            onYes();
+        });
+    }
+
+    var form = document.getElementById('form');
+    var confirmed = false;
+
+    function radioValue(fieldName) {
+        var checked = document.querySelector('input[name="' + fieldName + '"]:checked');
+        return checked ? checked.value : '';
+    }
+
+    form.addEventListener('submit', function (event) {
+        if (confirmed) return;
+        var amount = form.elements['ngo_amount'].value.trim();
+        // Only ask when the respondent donates and the answers are complete;
+        // otherwise the usual error message appears
+        if (radioValue('ngo_binary') !== 'True' || !amount || !radioValue('ngo_name')) return;
+
+        event.preventDefault();
+        var formatted = amount.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' COP';
+        showConfirmation(
+            '¿Es este el monto correcto?',
+            formatted,
+            'No, corregir',
+            function () {
+                confirmed = true;
+                form.submit();
+            },
+            function () {}  // stay on this page, answers are kept
+        );
+    });
+});
+</script>
 {{ endblock }}

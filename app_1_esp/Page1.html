@@ -47,63 +47,55 @@
 </h5>
 
 <script>
-    // Function to find and hide field by label text
-    function hideFieldByLabel(fieldName, labelTextPart) {
-        var labels = document.querySelectorAll('label');
-        for (var i = 0; i < labels.length; i++) {
-            var label = labels[i];
-            if (label.textContent.indexOf(labelTextPart) !== -1) {
-                var parent = label.parentElement;
-                var attempts = 0;
-                while (parent && parent !== document.body && attempts < 10) {
-                    var field = parent.querySelector('input[name="' + fieldName + '"], textarea[name="' + fieldName + '"]');
-                    if (field) {
-                        parent.style.display = 'none';
-                        parent.setAttribute('data-conditional-field', fieldName);
-                        break;
-                    }
-                    parent = parent.parentElement;
-                    attempts++;
+    (function () {
+        var ORIGIN_FIELD = 'survey_origin';
+        var CONDITIONAL_FIELDS = ['sector', 'seccion', 'manzana'];
+
+        function getOriginValue() {
+            var controls = document.getElementsByName(ORIGIN_FIELD);
+            for (var i = 0; i < controls.length; i++) {
+                if (controls[i].type === 'radio') {
+                    if (controls[i].checked) return controls[i].value;
+                } else {
+                    return controls[i].value;
                 }
-                if (parent && parent.getAttribute('data-conditional-field')) break;
+            }
+            return '';
+        }
+
+        function toggleField(fieldName, show) {
+            var controls = document.getElementsByName(fieldName);
+            if (!controls.length) return;
+
+            var wrapper = controls[0].closest('._formfield, .mb-3, .form-group') || controls[0].parentElement;
+            wrapper.style.display = show ? '' : 'none';
+
+            // Clear hidden fields so old answers are not submitted
+            if (!show) {
+                for (var i = 0; i < controls.length; i++) {
+                    if (controls[i].type === 'radio' || controls[i].type === 'checkbox') {
+                        controls[i].checked = false;
+                    } else {
+                        controls[i].value = '';
+                    }
+                }
             }
         }
-    }
 
-    // Function to toggle actividad_otra based on actividad selection
-    function toggleActividadOtra() {
-        var actividadRadios = document.querySelectorAll('input[name="module_0_actividad"]');
-        var actividadOtraContainer = document.querySelector('[data-conditional-field="module_0_actividad_otra"]');
-
-        if (!actividadOtraContainer) {
-            return;
-        }
-
-        // Check initial state
-        var selectedRadio = document.querySelector('input[name="module_0_actividad"]:checked');
-        if (selectedRadio && selectedRadio.value === '6') {
-            actividadOtraContainer.style.display = '';
-        } else {
-            actividadOtraContainer.style.display = 'none';
-        }
-
-        // Add event listeners
-        for (var i = 0; i < actividadRadios.length; i++) {
-            actividadRadios[i].addEventListener('change', function() {
-                if (this.value === '6') {
-                    actividadOtraContainer.style.display = '';
-                } else {
-                    actividadOtraContainer.style.display = 'none';
-                }
+        function updateConditionalFields() {
+            var show = getOriginValue() === '1';
+            CONDITIONAL_FIELDS.forEach(function (fieldName) {
+                toggleField(fieldName, show);
             });
         }
-    }
 
-    // First hide the conditional field and mark it
-    hideFieldByLabel('module_0_actividad_otra', 'Otra actividad:'); // Replace with actual label text
+        var originControls = document.getElementsByName(ORIGIN_FIELD);
+        for (var i = 0; i < originControls.length; i++) {
+            originControls[i].addEventListener('change', updateConditionalFields);
+        }
 
-    // Then set up the toggle
-    toggleActividadOtra();
+        updateConditionalFields();
+    })();
 </script>
 
 <p class="text-center">

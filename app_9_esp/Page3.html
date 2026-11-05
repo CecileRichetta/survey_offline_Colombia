@@ -1,12 +1,3 @@
-{{ block scripts }}
-    <html lang="en">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-{{ endblock }}
-
 {{ block style }}
     <style>
         .progress-text {
@@ -40,9 +31,9 @@
 {{ endblock }}
 
 {{ block title }}
-        <p class="progress-text" >
-            Progreso del cuestionario módulo 9/12
-        </p>
+    <p class="progress-text">
+        Progreso del cuestionario módulo 9/12
+    </p>
 {{ endblock }}
 
 {{ block content }}
@@ -51,15 +42,11 @@
     </h3>
 
     <h5>
-         {{ formfields }}
+        {{ formfields }}
     </h5>
     <p class="text-center">
-        <button class="btn btn-primary">
+        <button type="submit" id="next-button" class="btn btn-primary">
             SIGUIENTE
         </button>
     </p>
-{{ endblock }}
-
-{{ block options }}
-    </html>
 {{ endblock }}

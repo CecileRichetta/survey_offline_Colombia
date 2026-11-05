@@ -40,14 +40,29 @@
         <b>Fin de la encuesta</b>
     </h3>
     <h5>
-        <p class="text-center">
-            Participation fee: {{ participant.vars.participation_fee }} COP <br><br>
-                {{ if session.config.name == "session_C4P_SPANISH_w1" }}
-                    {{ if not participant.vars.dropout }}
-                        <br><br>
-                    {{ endif }}
-                {{ endif }}
-        </p>
+        {{ if show_payment }}
+            <p class="text-center"><b>Resumen de su compensación</b></p>
+            <table class="table mx-auto" style="max-width: 500px;">
+                <tr>
+                    <td>Ganancias de las actividades</td>
+                    <td class="text-end text-nowrap">{{ games_cop }}</td>
+                </tr>
+                <tr>
+                    <td>
+                        Cuota de participación
+                        {{ if has_donation }}
+                            <br><small>({{ full_fee_cop }} menos su donación de {{ donation_cop }})</small>
+                        {{ endif }}
+                    </td>
+                    <td class="text-end text-nowrap">{{ fee_cop }}</td>
+                </tr>
+                <tr>
+                    <td><b>Total</b></td>
+                    <td class="text-end text-nowrap"><b>{{ total_cop }}</b></td>
+                </tr>
+            </table>
+            <br>
+        {{ endif }}
             {{ formfields }} <br>
         <p class="text-center">
             <button class="btn btn-primary">

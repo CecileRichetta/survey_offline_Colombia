@@ -28,6 +28,40 @@
     .text-center {
         text-align: center;
     }
+    .confirm-overlay {
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        z-index: 2000;
+        background: rgba(0, 0, 0, 0.6);
+        overflow-y: auto;
+        padding: 16px;
+    }
+    .confirm-box {
+        background: white;
+        max-width: 600px;
+        margin: 16px auto;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .confirm-box h4 { color: #0d6efd; }
+    .confirm-box h5 {
+        margin-top: 1rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid #ccc;
+    }
+    .confirm-row { margin-bottom: 0.5rem; overflow-wrap: anywhere; }
+    .confirm-row b { display: block; font-size: 14px; color: #555; font-weight: normal; }
+    .confirm-row span { font-size: 18px; font-weight: bold; }
+    .confirm-buttons { display: flex; gap: 12px; margin-top: 1.25rem; }
+    .confirm-buttons button { flex: 1; }
+    .btn-confirm-no {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
 </style>
 {{ endblock }}
 
@@ -71,6 +105,8 @@
             {{ formfield 'recall_phone_2' }}
             {{ formfield 'recall_email' }}
             {{ formfield 'recall_address' }}
+            {{ formfield 'recall_other_phone_bi' }}
+            {{ formfield 'recall_other_phone' }}
         </h5>
     {{ endif }}
 
@@ -135,19 +171,115 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateRecall() {
         // recall_phone_2: only if recall_phone_bi == 0
         setVisible('recall_phone_2', radioValue('recall_phone_bi') === '0');
+        // recall_other_phone: only if recall_other_phone_bi == 1
+        setVisible('recall_other_phone', radioValue('recall_other_phone_bi') === '1');
     }
 
     // Listen for changes on the radio buttons
     document.querySelectorAll('input[name="payment_platform_1"]').forEach(function (r) {
         r.addEventListener('change', updatePayment);
     });
-    document.querySelectorAll('input[name="recall_phone_bi"]').forEach(function (r) {
+    document.querySelectorAll('input[name="recall_phone_bi"], input[name="recall_other_phone_bi"]').forEach(function (r) {
         r.addEventListener('change', updateRecall);
     });
 
     // Set the initial state (also correct after an error_message reload)
     updatePayment();
     updateRecall();
+
+    // ----- Confirmation pop-up before leaving the page -----
+    var form = document.getElementById('form');
+    var confirmed = false;
+
+    function textValue(fieldName) {
+        var input = document.querySelector('[name="' + fieldName + '"]');
+        return input ? input.value.trim() : '';
+    }
+
+    // Returns the sections to show, or null if an answer is missing
+    // (then the usual error message appears instead of the pop-up)
+    function buildSummary() {
+        var p1 = radioValue('payment_platform_1');
+        var thirdParty = p1 === '999';
+        var payment = [
+            ['Plataforma', thirdParty ? radioValue('payment_platform_2') : p1],
+            ['Teléfono para el pago', textValue(thirdParty ? 'payment_phone_2' : 'payment_phone_1')],
+            ['Nombre de quien recibe el giro', textValue('payment_name')],
+            ['Cédula de quien recibe el giro', textValue('id_number')],
+            ['Dirección de quien recibe el giro', textValue('payment_address')]
+        ];
+        var sections = [['Pago de la compensación', payment]];
+
+        // Recontact questions only exist in wave 1
+        if (document.querySelector('[name="recall_name"]')) {
+            var samePhone = radioValue('recall_phone_bi') === '1';
+            var recontact = [
+                ['Nombre', textValue('recall_name')],
+                ['Teléfono', samePhone ? payment[1][1] : textValue('recall_phone_2')],
+                ['Correo electrónico', textValue('recall_email')],
+                ['Dirección', textValue('recall_address')]
+            ];
+            if (radioValue('recall_other_phone_bi') === '1') {
+                recontact.push(['Teléfono de otra persona', textValue('recall_other_phone')]);
+            }
+            sections.push(['Recontacto', recontact]);
+        }
+
+        for (var s = 0; s < sections.length; s++) {
+            for (var r = 0; r < sections[s][1].length; r++) {
+                if (!sections[s][1][r][1]) return null;
+            }
+        }
+        return sections;
+    }
+
+    function addElement(parent, tag, text, className) {
+        var el = document.createElement(tag);
+        if (text) el.textContent = text;  // textContent: answers are shown as plain text
+        if (className) el.className = className;
+        parent.appendChild(el);
+        return el;
+    }
+
+    function showConfirmation(sections) {
+        var overlay = addElement(document.body, 'div', '', 'confirm-overlay');
+        var box = addElement(overlay, 'div', '', 'confirm-box');
+        addElement(box, 'h4', '¿Esta información es correcta?');
+        addElement(box, 'p', 'Léale estos datos a la persona encuestada y confírmelos con ella.');
+
+        sections.forEach(function (section) {
+            addElement(box, 'h5', section[0]);
+            section[1].forEach(function (row) {
+                var line = addElement(box, 'div', '', 'confirm-row');
+                addElement(line, 'b', row[0]);
+                addElement(line, 'span', row[1]);
+            });
+        });
+
+        var buttons = addElement(box, 'div', '', 'confirm-buttons');
+        var no = addElement(buttons, 'button', 'No, corregir', 'btn-confirm-no');
+        var yes = addElement(buttons, 'button', 'Sí, continuar', 'btn btn-primary');
+        no.type = 'button';
+        yes.type = 'button';
+
+        no.addEventListener('click', function () {
+            document.body.removeChild(overlay);  // stay on the page, answers are kept
+        });
+        yes.addEventListener('click', function () {
+            confirmed = true;
+            yes.disabled = true;
+            no.disabled = true;
+            form.submit();
+        });
+    }
+
+    form.addEventListener('submit', function (event) {
+        if (confirmed) return;
+        var sections = buildSummary();
+        if (!sections) return;  // something is missing: let the usual error appear
+        event.preventDefault();
+        showConfirmation(sections);
+    });
 });
 </script>
 {{ endblock }}

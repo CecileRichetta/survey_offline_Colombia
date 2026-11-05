@@ -29,6 +29,33 @@ preparing a tablet, or a tablet changes hands, clear the code: type `0` in the m
 `rm ~/.c4p_enumerator`. Send the data first when a tablet changes hands, because the next upload
 goes to the new code's folder.
 
+## Final clean-up (once per tablet, after training, before fieldwork)
+
+Needs internet. It is not in the menu, so enumerators cannot start it by accident.
+Type `0` in the menu, then paste:
+
+```
+cd ~/otree-experiments/survey_offline_Colombia && git fetch && git checkout origin/HEAD -- offline/limpiar_tablet.sh && bash offline/limpiar_tablet.sh
+```
+
+Type `BORRAR` when asked. It does three things:
+
+1. **Erases all data:** the database and every file written by the survey. A copy first
+   goes to `C4P_Data/capacitacion/<code>/` on SwitchDrive, apart from the real data. If the
+   copy can't be sent, nothing is deleted.
+2. **Gets the latest version** from GitHub, including the clean data files.
+3. **Erases the enumerator code.**
+
+It must end with `LIMPIEZA COMPLETA`. Never run it once a tablet holds real interviews.
+
+## Tablet data files in the repository
+
+Keep these files clean in the repository: header only, with counts and totals at 0.
+Once a tablet is in the field, **never change them again**: `git pull` (option 3) refuses
+to update a tablet when they change, because the tablet's copies hold its data.
+A tablet installed before a change to these files needs the final clean-up line above,
+because option 3 will fail on it.
+
 ## Daily use: the menu
 
 | Number | Script | What it does |
